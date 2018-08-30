@@ -1,3 +1,204 @@
 page-home {
 
+    * {
+      box-sizing: border-box;
+    }
+
+    ion-content {
+        padding: 0!important;
+    }
+
+    header {
+        margin-top: 12px;
+
+        .grid {
+            padding: 0;
+        }
+
+        ion-grid ion-row ion-col .branding {
+            h6 {
+                font-family: 'Times New Roman', serif;
+                font-size: 14px;
+                vertical-align: middle;
+                margin-bottom: 0;
+                line-height: 0.75em;
+
+                .title {
+                    color: rgb(25,25,25);
+                }
+
+                .description, .site-link {
+                    font-size: 10px;
+                    color: rgb(25,25,25);
+
+                    a:hover, a:active {
+                        text-decoration: none;
+                    }
+
+                    a:link, a:visited {
+                        color: rgb(25,25,25);
+                    }
+                }
+            }
+
+            img {
+                height: 18px;
+                padding-bottom: 2px;
+                vertical-align: middle;
+                opacity: 0.87;
+            }
+        }
+
+        ion-grid ion-row ion-col .controls-container {
+            width: 100%;
+            height: 100%;
+
+            .control {
+                width: calc(100%/4);
+                height: 100%;
+                float: right;
+                position: relative;
+            }
+        }
+    }
+
+    .signals-container {
+        clear: both;
+        margin: 10px 0;
+        // height: 70px;
+        // overflow: hidden;
+    }
+
+    .signal {
+        color: rgb(25,25,25);
+        overflow: hidden;
+        height: 90px;
+        width: 190px;
+
+        span {
+            font-size: 9px;
+            // border-right: 0.5px solid rgba(25,25,25,0.7);
+            padding-right: 10px;
+            margin: 5px 10px 0 0;
+        }
+
+        span, canvas {
+            height: 100%;
+            float: left;
+            vertical-align: middle;
+        }
+    }
+
+    .signal-canvas {
+        clear: both;
+        width: 170px;
+        height: 50px;
+        position: relative;
+
+        .grid-container {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            z-index: -1;
+            height: 100%;
+            width: 100%;
+
+            .fifth {
+                width: calc(100%/5);
+                height: 100%;
+                float: left;
+                position: relative;
+                border: 0.5px dotted black !important;
+            }
+        }
+    }
+
+    .board-container {
+        width: 280px;
+        height: 280px;
+        margin: 20px auto 0 auto;
+
+        .square-row .square {
+            width: calc(100% / 8);
+            height: calc(100% / 8);
+            float: left;
+            position: relative;
+            padding-bottom: calc(100% / 8);
+        }
+
+        .square-row .square .square-content {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            color: white;
+            background-color: #fefefe;
+            display: flex!important;
+            align-content: center!important;
+            align-items: center!important;
+            justify-content: center;
+            margin: auto;
+            border: 1px solid rgb(245, 245, 245);
+        }
+
+        .square-row .blank-square .square-content {
+            background-color: white;
+        }
+
+        .square-row:nth-child(1) .square:nth-child(1) .square-content {
+            border-top: none;
+            border-left: none;
+        }
+
+        .square-row:nth-child(1) .square:nth-child(8) .square-content {
+            border-top: none;
+            border-right: none;
+        }
+
+        .square-row:nth-child(8) .square:nth-child(1) .square-content {
+            border-bottom: none;
+            border-left: none;
+        }
+
+        .square-row:nth-child(8) .square:nth-child(8) .square-content {
+            border-bottom: none;
+            border-right: none;
+        }
+
+        .square-row .locator .square-content {
+            // background-color: #ffffef;
+            background-color: #eefefe;
+            color: #dedede;
+            border: none;
+        }
+
+        .square-row .opponent .square-content {
+            -moz-transform: scale(-1, -1);
+            -webkit-transform: scale(-1, -1);
+            -o-transform: scale(-1, -1);
+            -ms-transform: scale(-1, -1);
+            transform: scale(-1, -1);
+        }
+
+        .square-row:nth-child(even) .playable:nth-child(even) .square-content {
+            background-color: rgb(245, 245, 245);
+        }
+
+        .square-row:nth-child(odd) .playable:nth-child(odd) .square-content {
+            background-color: rgb(245, 245, 245);
+        }
+    }
+
+    .white-target, .white-score {
+        // -moz-transform: scale(-1, -1);
+        // -webkit-transform: scale(-1, -1);
+        // -o-transform: scale(-1, -1);
+        // -ms-transform: scale(-1, -1);
+        // transform: scale(-1, -1);
+
+        float: right;
+    }
+
+    .black-target, .black-score {
+        float: left;
+    }
 }

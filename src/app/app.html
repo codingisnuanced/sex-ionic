@@ -1,1 +1,64 @@
-<ion-nav [root]="rootPage"></ion-nav>
+<ion-menu [content]="content" id="main-menu">
+
+    <ion-content id="main-menu-content">
+        <ion-list no-lines>
+            <ion-item>
+                <div class="branding">
+                    <h6>
+                        <span class="title"><img src="assets/imgs/tosoto-logo.png" alt="Tosoto Labs">Sex</span>
+                        <br>
+                        <span class="description">
+                            Playing II Complex
+                        </span>
+                    </h6>
+                </div>
+            </ion-item>
+            <ion-item><span class="num-player-icon">I</span><span class="menu-item-text heading">One-player</span></ion-item>
+            <ion-item>
+                <button ion-button-small icon-only><ion-icon ios="ios-play-outline" md="ios-play-outline"></ion-icon><span class="menu-item-text">Simple Sex</span><ion-icon ios="ios-information-circle-outline" md="ios-information-circle-outline"></ion-icon></button>
+            </ion-item>
+            <ion-item>
+                <button ion-button-small icon-only clear><ion-icon ios="ios-play-outline" md="ios-play-outline"></ion-icon><span class="menu-item-text">Complex Sex</span><ion-icon ios="ios-information-circle-outline" md="ios-information-circle-outline"></ion-icon></button>
+            </ion-item>
+            <ion-item><span class="num-player-icon">II</span><span class="menu-item-text heading">Two-player</span></ion-item>
+            <ion-item>
+                <button ion-button-small icon-only><ion-icon ios="ios-play-outline" md="ios-play-outline"></ion-icon><span class="menu-item-text">Simple Sex</span><ion-icon ios="ios-information-circle-outline" md="ios-information-circle-outline"></ion-icon></button>
+            </ion-item>
+            <ion-item>
+                <button ion-button-small icon-only clear><ion-icon ios="ios-play-outline" md="ios-play-outline"></ion-icon><span class="menu-item-text">Complex Sex</span><ion-icon ios="ios-information-circle-outline" md="ios-information-circle-outline"></ion-icon></button>
+            </ion-item>
+            <!-- <ion-item>
+                <div class="controls-container">
+                    <button ion-button-small icon-only clear class="control"><ion-icon name="information"></ion-icon></button>
+                    <button ion-button-small icon-only clear class="control"><ion-icon name="refresh"></ion-icon></button>
+                    <button ion-button-small icon-only clear class="control"><ion-icon ios="md-share" md="md-share"></ion-icon></button>
+                </div>
+            </ion-item> -->
+            <ion-item>
+                <ion-label>
+                    <ion-icon ios="ios-analytics-outline" md="ios-analytics-outline" class="intui-logic-icon"></ion-icon><span class="menu-item-text heading">Intuition-Logic</span>
+                <!-- <button ion-button-small icon-only clear><ion-icon name="help-circle"></ion-icon></button> -->
+                </ion-label>
+                <ion-toggle checked="false" color="dark"></ion-toggle>
+            </ion-item>
+            <ion-item>
+                <div class="intui-logic-container">
+                    <button ion-button-small icon-only clear class="control"><ion-icon ios="ios-eye" md="ios-eye"></ion-icon></button>
+                    <span>or</span>
+                    <button ion-button-small icon-only clear class="control intui-logic-selected"><ion-icon ios="ios-calculator" md="ios-calculator"></ion-icon></button>
+                </div>
+            </ion-item>
+            <ion-item>
+                <div class="intui-logic-container">
+                    <button ion-button-small icon-only clear class="control intui-logic-selected"><ion-icon ios="ios-eye-outline" md="ios-eye-outline"></ion-icon></button>
+                    <span>or</span>
+                    <button ion-button-small icon-only clear class="control"><ion-icon ios="ios-calculator-outline" md="ios-calculator-outline"></ion-icon></button>
+                </div>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+
+</ion-menu>
+
+
+<ion-nav [root]="rootPage" #content swipeBackEnabled="false"></ion-nav>

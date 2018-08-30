@@ -1,14 +1,146 @@
-<ion-header>
-  <ion-navbar>
-    <ion-title>
-      Ionic Blank
-    </ion-title>
-  </ion-navbar>
-</ion-header>
+<ion-content padding no-bounce id="page-home-content">
+    <header>
+        <ion-grid>
+            <ion-row>
+                <ion-col col-6>
+                    <div class="branding">
+                        <h6>
+                            <span class="title"><img src="assets/imgs/tosoto-logo.png" alt="Tosoto Labs">Sex</span>
+                            <br>
+                            <span class="description">
+                                A Game of Interaction
+                            </span>
+                            <br>
+                            <span class="site-link"><a href="#">Tosotolabs.info</a></span>
+                        </h6>
+                    </div>
+                </ion-col>
+                <ion-col>
+                    <div class="controls-container">
+                        <button class="control" ion-button-small icon-only clear menuToggle><ion-icon name="more"></ion-icon></button>
+                        <button class="control" ion-button-small icon-only clear><ion-icon ios="md-share" md="md-share"></ion-icon></button>
+                        <button class="control" ion-button-small icon-only clear><ion-icon name="refresh"></ion-icon></button>
+                    </div>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </header>
 
-<ion-content padding>
-  The world is your oyster.
-  <p>
-    If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will be your guide.
-  </p>
+    <div class="signals-container">
+        <iframe class="signal" src="assets/templates/signal.html" frameBorder="0"></iframe>
+    </div>
+
+    <div class="signals-container">
+        <div class="signal white-target">
+            <span>Target signal</span><br>
+            <canvas id="white-target-signal-canvas" #whiteTargetSignalCanvas width="170" height="50"></canvas>
+        </div>
+
+        <div class="signal white-score">
+            <span>White score signal</span><br>
+            <canvas id="white-score-signal-canvas" #whiteScoreSignalCanvas width="170" height="50"></canvas>
+        </div>
+    </div>
+
+    <div class="board-container">
+        <div class="square-row">
+            <div class="square blank-square"><div class="square-content"></div></div>
+            <div class="square locator"><div class="square-content">A</div></div>
+            <div class="square locator"><div class="square-content">B</div></div>
+            <div class="square locator"><div class="square-content">C</div></div>
+            <div class="square locator"><div class="square-content">D</div></div>
+            <div class="square locator"><div class="square-content">E</div></div>
+            <div class="square locator"><div class="square-content">F</div></div>
+            <div class="square blank-square"><div class="square-content"></div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="square locator"><div class="square-content">0</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square locator opponent"><div class="square-content">0</div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="square locator"><div class="square-content">1</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square locator opponent"><div class="square-content">1</div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="square locator"><div class="square-content">2</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square locator opponent"><div class="square-content">2</div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="square locator"><div class="square-content">3</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square locator opponent"><div class="square-content">3</div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="square locator"><div class="square-content">4</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square locator opponent"><div class="square-content">4</div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="square locator"><div class="square-content">5</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square locator opponent"><div class="square-content">5</div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="square blank-square"><div class="square-content"></div></div>
+            <div class="square locator opponent"><div class="square-content">A</div></div>
+            <div class="square locator opponent"><div class="square-content">B</div></div>
+            <div class="square locator opponent"><div class="square-content">C</div></div>
+            <div class="square locator opponent"><div class="square-content">D</div></div>
+            <div class="square locator opponent"><div class="square-content">E</div></div>
+            <div class="square locator opponent"><div class="square-content">F</div></div>
+            <div class="square blank-square"><div class="square-content"></div></div>
+        </div>
+    </div>
+
+    <div class="signals-container">
+        <div class="signal black-target" #blackTargetSignal>
+            <span>Target signal</span><br>
+            <canvas id="black-target-signal-canvas" #blackTargetSignalCanvas width="170" height="50"></canvas>
+        </div>
+
+        <div class="signal black-score" #blackScoreSignal>
+            <span>Black score signal</span><br>
+            <canvas id="black-score-signal-canvas" #blackScoreSignalCanvas width="170" height="50"></canvas>
+        </div>
+    </div>
 </ion-content>
