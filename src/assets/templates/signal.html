@@ -3,14 +3,31 @@
     <head>
         <meta charset="utf-8">
         <title></title>
+
+        <style media="screen">
+            * {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+            :focus {
+                outline: none!important;
+            }
+            body {
+                overflow: hidden;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                /* background-color: #ffffef; */
+            }
+        </style>
     </head>
     <body>
-        <div class="signal white-target">
-            <span>Target signal</span><br>
-            <canvas id="white-target-signal-canvas" #whiteTargetSignalCanvas width="170" height="50"></canvas>
-        </div>
+        <canvas id="signal-canvas"></canvas>
 
         <script src="../js/Chart.min.js"></script>
+        <script src="../js/chartjs-plugin-dragData.min.js"></script>
         <script src="../js/signal.js"></script>
     </body>
 </html>

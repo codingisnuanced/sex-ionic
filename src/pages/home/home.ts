@@ -1,6 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MenuController } from 'ionic-angular';
-import * as HighCharts from "highcharts";
 
 @Component({
   selector: 'page-home',
@@ -8,47 +7,17 @@ import * as HighCharts from "highcharts";
 })
 export class HomePage {
 
-    @ViewChild('blackTargetSignalCanvas') blackTargetSignalCanvas: ElementRef;
-    @ViewChild('blackScoreSignalCanvas') blackScoreSignalCanvas: ElementRef;
-    @ViewChild('whiteTargetSignalCanvas') whiteTargetSignalCanvas: ElementRef;
-    @ViewChild('whiteScoreSignalCanvas') whiteScoreSignalCanvas: ElementRef;
-
-    // @ViewChild('blackTargetSignal') blackTargetSignal: ElementRef;
-
     constructor(public menu: MenuController) {
         menu.enable(true);
     }
 
     ngAfterViewInit() {
-        // window['particlesJS'].load('page-home-content', 'assets/config/particles.json', function() {
-        //     console.log('callback - particles.js config loaded');
-        // });
-        // setupSignal(this.blackTargetSignal.nativeElement);
-        setupTargetSignal(this.blackTargetSignalCanvas.nativeElement,1,1);
-        setupTargetSignal(this.blackScoreSignalCanvas.nativeElement,1,1);
-        setupTargetSignal(this.whiteTargetSignalCanvas.nativeElement,-1,-1);
-        setupTargetSignal(this.whiteScoreSignalCanvas.nativeElement,1,1);
+        // TODO: particlesJS config should be loaded with consideration of screen size
+        window['particlesJS'].load('page-home-content', 'assets/config/particles.json', function() {
+            console.log('callback - particles.js config loaded');
+        });
     }
 
-}
-
-let setupSignal = (sigid)=> {
-    sigid.innerHTML = sigid.innerHTML+chartTemplate();
-}
-
-let chartTemplate = ()=> {
-    return `
-        <div class="signal-canvas">
-            <div class="grid-container">
-                <div class="fifth"></div>
-                <div class="fifth"></div>
-                <div class="fifth"></div>
-                <div class="fifth"></div>
-                <div class="fifth"></div>
-            </div>
-            <p>Hello</p>
-        </div>
-        `
 }
 
 let setupTargetSignal = (canvas,hsc,vsc)=> {

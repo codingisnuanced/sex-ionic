@@ -64,59 +64,83 @@ page-home {
 
     .signals-container {
         clear: both;
-        margin: 10px 0;
-        // height: 70px;
-        // overflow: hidden;
+        // margin: 10px 0;
+        height: 70px;
+        position: relative;
     }
 
     .signal {
         color: rgb(25,25,25);
-        overflow: hidden;
-        height: 90px;
-        width: 190px;
 
         span {
             font-size: 9px;
-            // border-right: 0.5px solid rgba(25,25,25,0.7);
-            padding-right: 10px;
-            margin: 5px 10px 0 0;
         }
 
-        span, canvas {
-            height: 100%;
-            float: left;
-            vertical-align: middle;
+        iframe {
+            overflow: hidden;
+        }
+
+        iframe:focus {
+            outline: none!important;
         }
     }
 
-    .signal-canvas {
-        clear: both;
-        width: 170px;
+    .white-signals-container {
+        margin-top: 20px;
+
+        .signal {
+            -moz-transform: scale(-1, -1);
+            -webkit-transform: scale(-1, -1);
+            -o-transform: scale(-1, -1);
+            -ms-transform: scale(-1, -1);
+            transform: scale(-1, -1);
+            float: right;
+        }
+    }
+
+    .white-target-signal, .white-score-signal, .black-target-signal, .black-score-signal {
         height: 50px;
+        width: 170px;
         position: relative;
 
-        .grid-container {
-            position: absolute;
-            left: 0px;
-            top: 0px;
-            z-index: -1;
-            height: 100%;
-            width: 100%;
-
-            .fifth {
-                width: calc(100%/5);
-                height: 100%;
-                float: left;
-                position: relative;
-                border: 0.5px dotted black !important;
-            }
+        iframe {
+            height: 50px;
+            width: 170px;
         }
+    }
+
+    .white-target-signal, .white-score-signal {
+        top: 20px;
+    }
+
+    .white-piece-signal, .black-piece-signal {
+        height: 70px;
+        width: 300px;
+        position: absolute;
+        top: 0px;
+
+        iframe {
+            height: 70px;
+            width: 300px;
+        }
+    }
+
+    .white-piece-signal {
+        right: 0px;
+    }
+
+    .black-signals-container .signal {
+        float: left;
+    }
+
+    .black-piece-signal {
+        left: 0px;
     }
 
     .board-container {
-        width: 280px;
-        height: 280px;
-        margin: 20px auto 0 auto;
+        width: 250px;
+        height: 250px;
+        margin: 0px auto;
 
         .square-row .square {
             width: calc(100% / 8);
@@ -186,19 +210,5 @@ page-home {
         .square-row:nth-child(odd) .playable:nth-child(odd) .square-content {
             background-color: rgb(245, 245, 245);
         }
-    }
-
-    .white-target, .white-score {
-        // -moz-transform: scale(-1, -1);
-        // -webkit-transform: scale(-1, -1);
-        // -o-transform: scale(-1, -1);
-        // -ms-transform: scale(-1, -1);
-        // transform: scale(-1, -1);
-
-        float: right;
-    }
-
-    .black-target, .black-score {
-        float: left;
     }
 }

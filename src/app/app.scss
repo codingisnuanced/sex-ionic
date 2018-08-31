@@ -24,6 +24,17 @@ sex-app {
         -webkit-box-shadow: none!important;
         box-shadow: none!important;
         width: 17em;
+        border-top: 1px dashed rgba(0,0,0,0.7);
+        border-right: 2px solid rgba(0,0,0,0.85);
+        background-color: white!important;
+        background-image: linear-gradient(#ffffff, #efefef)!important;
+        background-image: linear-gradient(0deg, transparent 24%, rgba(0, 0, 0, .05) 25%, rgba(0, 0, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 0, 0, .05) 75%, rgba(0, 0, 0, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0, 0, 0, .05) 25%, rgba(0, 0, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 0, 0, .05) 75%, rgba(0, 0, 0, .05) 76%, transparent 77%, transparent)!important;
+        // height:100%;
+        background-size:50px 50px!important;
+
+        * {
+            background-color: rgba(0,0,0,0)!important;
+        }
     }
 
     ion-menu ion-content {
@@ -32,11 +43,13 @@ sex-app {
         ion-list ion-item {
             height: 1em;
             padding: 0;
-            background-color: rgba(0,0,0,0);
 
             button {
                 padding: 10px;
-                background-color: rgba(0,0,0,0);
+
+                ion-icon {
+                    padding-top: 10px;
+                }
             }
         }
 

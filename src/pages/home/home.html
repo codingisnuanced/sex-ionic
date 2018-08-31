@@ -26,19 +26,18 @@
         </ion-grid>
     </header>
 
-    <div class="signals-container">
-        <iframe class="signal" src="assets/templates/signal.html" frameBorder="0"></iframe>
-    </div>
-
-    <div class="signals-container">
-        <div class="signal white-target">
+    <div class="signals-container white-signals-container">
+        <div class="signal white-target-signal">
             <span>Target signal</span><br>
-            <canvas id="white-target-signal-canvas" #whiteTargetSignalCanvas width="170" height="50"></canvas>
+            <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
         </div>
-
-        <div class="signal white-score">
+        <div class="signal white-score-signal">
             <span>White score signal</span><br>
-            <canvas id="white-score-signal-canvas" #whiteScoreSignalCanvas width="170" height="50"></canvas>
+            <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
+        </div>
+        <div class="signal white-piece-signal">
+            <span>E4 signal</span>
+            <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="300" drawHeight="70" adjustable="true"></iframe>
         </div>
     </div>
 
@@ -132,15 +131,18 @@
         </div>
     </div>
 
-    <div class="signals-container">
-        <div class="signal black-target" #blackTargetSignal>
+    <div class="signals-container black-signals-container">
+        <div class="signal black-target-signal">
             <span>Target signal</span><br>
-            <canvas id="black-target-signal-canvas" #blackTargetSignalCanvas width="170" height="50"></canvas>
+            <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
         </div>
-
-        <div class="signal black-score" #blackScoreSignal>
+        <div class="signal black-score-signal">
             <span>Black score signal</span><br>
-            <canvas id="black-score-signal-canvas" #blackScoreSignalCanvas width="170" height="50"></canvas>
+            <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
+        </div>
+        <div class="signal black-piece-signal">
+            <span>E4 signal</span>
+            <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="300" drawHeight="70" adjustable="true"></iframe>
         </div>
     </div>
 </ion-content>

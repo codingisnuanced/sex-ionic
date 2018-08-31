@@ -1,7 +1,7 @@
 {
     "particles":{
         "number":{
-            "value":135,
+            "value":100,
             "density":{
                 "enable":false,
                 "value_area":1972.96252160394
@@ -20,7 +20,7 @@
                 "nb_sides":4
                 },
             "image":{
-                "src":"img/github.svg",
+                "src":"",
                 "width":100,"height":100
                 }
             },
@@ -48,7 +48,7 @@
             "enable":true,
             "distance":125,
             "color":"#000000",
-            "opacity":0.07,
+            "opacity":0.1,
             "width":0.3
             },
         "move":{
@@ -67,16 +67,17 @@
             }
         },
     "interactivity":{
-        "detect_on":"canvas",
+        "detect_on":"window",
         "events":{
             "onhover":{
                 "enable":false,
                 "mode":"repulse"
                 },
             "onclick":{
-                "enable":false,
-                "mode":"push"
-                },"resize":true
+                "enable":true,
+                "mode":"repulse"
+                },
+            "resize":true
             },
         "modes":{
             "grab":{
@@ -93,8 +94,8 @@
                 "speed":3
                 },
             "repulse":{
-                "distance":200,
-                "duration":0.4
+                "distance":75,
+                "duration":0.25
                 },
             "push":{
                 "particles_nb":4
