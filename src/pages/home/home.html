@@ -23,8 +23,8 @@
                     </div>
                     <div class="turns-taken">
                         <div class="valign-fix">
-                            <div class="white-turns-taken">0 | moves</div>
-                            <div class="black-turns-taken">moves | 0</div>
+                            <div class="white">0 | moves</div>
+                            <div class="black">moves | 0</div>
                         </div>
                     </div>
                 </ion-col>
@@ -32,17 +32,17 @@
         </ion-grid>
     </header>
 
-    <div class="signals-container white-signals-container">
-        <div class="signal white-target-signal">
-            <span>Target signal</span><br>
+    <div class="signals-container white">
+        <div class="signal white target">
+            <div>Target signal</div>
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
         </div>
-        <div class="signal white-score-signal">
-            <span>Score signal | 67.54%</span><br>
+        <div class="signal white score">
+            <div>Score signal | <span class="correlation-score">67.54</span>%</div>
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
         </div>
-        <div class="signal white-piece-signal">
-            <span>E4 signal | 67.54</span>
+        <div class="signal white piece">
+            <div>E4 signal | <span class="correlation-score">67.54</span>%</div>
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="300" drawHeight="70" adjustable="true"></iframe>
         </div>
     </div>
@@ -58,78 +58,330 @@
                 </div>
             </div>
             <div class="square blank-square"><div class="square-content"></div></div>
-            <div class="square locator"><div class="square-content"><button disabled ion-button>A</button></div></div>
-            <div class="square locator"><div class="square-content"><button disabled ion-button>B</button></div></div>
-            <div class="square locator"><div class="square-content"><button disabled ion-button>C</button></div></div>
-            <div class="square locator"><div class="square-content"><button disabled ion-button>D</button></div></div>
-            <div class="square locator"><div class="square-content"><button disabled ion-button>E</button></div></div>
-            <div class="square locator"><div class="square-content"><button disabled ion-button>F</button></div></div>
+            <div class="square locator A color-picker"><div class="square-content"><button disabled ion-button>A</button></div></div>
+            <div class="square locator B color-picker"><div class="square-content"><button disabled ion-button>B</button></div></div>
+            <div class="square locator C color-picker"><div class="square-content"><button disabled ion-button>C</button></div></div>
+            <div class="square locator D color-picker"><div class="square-content"><button disabled ion-button>D</button></div></div>
+            <div class="square locator E color-picker"><div class="square-content"><button disabled ion-button>E</button></div></div>
+            <div class="square locator F color-picker"><div class="square-content"><button disabled ion-button>F</button></div></div>
             <div class="square blank-square"><div class="square-content"></div></div>
         </div>
 
         <div class="square-row">
             <div class="square locator"><div class="square-content">5</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
             <div class="square locator white"><div class="square-content">5</div></div>
         </div>
 
         <div class="square-row">
             <div class="square locator"><div class="square-content">4</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
             <div class="square locator white"><div class="square-content">4</div></div>
         </div>
 
         <div class="square-row">
             <div class="square locator"><div class="square-content">3</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
             <div class="square locator white"><div class="square-content">3</div></div>
         </div>
 
         <div class="square-row">
             <div class="square locator"><div class="square-content">2</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
             <div class="square locator white"><div class="square-content">2</div></div>
         </div>
 
         <div class="square-row">
             <div class="square locator"><div class="square-content">1</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
             <div class="square locator white"><div class="square-content">1</div></div>
         </div>
 
         <div class="square-row">
             <div class="square locator"><div class="square-content">0</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="square playable">
+                <div class="square-content">
+                    <button ion-button>
+                        <span class="player-color"></span>
+                        <span class="piece-color"></span>
+                    </button>
+                </div>
+            </div>
             <div class="square locator white"><div class="square-content">0</div></div>
         </div>
 
@@ -143,27 +395,27 @@
                 </div>
             </div>
             <div class="square blank-square"><div class="square-content"></div></div>
-            <div class="square locator white"><div class="square-content"><button disabled ion-button>A</button></div></div>
-            <div class="square locator white"><div class="square-content"><button disabled ion-button>B</button></div></div>
-            <div class="square locator white"><div class="square-content"><button disabled ion-button>C</button></div></div>
-            <div class="square locator white"><div class="square-content"><button disabled ion-button>D</button></div></div>
-            <div class="square locator white"><div class="square-content"><button disabled ion-button>E</button></div></div>
-            <div class="square locator white"><div class="square-content"><button disabled ion-button>F</button></div></div>
+            <div class="square locator A color-picker white"><div class="square-content"><button disabled ion-button>A</button></div></div>
+            <div class="square locator B color-picker white"><div class="square-content"><button disabled ion-button>B</button></div></div>
+            <div class="square locator C color-picker white"><div class="square-content"><button disabled ion-button>C</button></div></div>
+            <div class="square locator D color-picker white"><div class="square-content"><button disabled ion-button>D</button></div></div>
+            <div class="square locator E color-picker white"><div class="square-content"><button disabled ion-button>E</button></div></div>
+            <div class="square locator F color-picker white"><div class="square-content"><button disabled ion-button>F</button></div></div>
             <div class="square blank-square"><div class="square-content"></div></div>
         </div>
     </div>
 
-    <div class="signals-container black-signals-container">
-        <div class="signal black-target-signal">
-            <span>Target signal</span><br>
+    <div class="signals-container black">
+        <div class="signal black target">
+            <div>Target signal</div>
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
         </div>
-        <div class="signal black-score-signal">
-            <span>Score signal | 67.54%</span><br>
+        <div class="signal black score">
+            <div>Score signal | <span class="correlation-score">67.54</span>%</div>
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
         </div>
-        <div class="signal black-piece-signal">
-            <span>E4 signal | 67.54%</span>
+        <div class="signal black piece">
+            <div>E4 signal | <span class="correlation-score">67.54</span>%</div>
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="300" drawHeight="70" adjustable="true"></iframe>
         </div>
     </div>

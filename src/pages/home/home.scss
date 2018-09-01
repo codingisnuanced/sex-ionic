@@ -69,17 +69,17 @@ page-home {
                     vertical-align: middle;
                 }
 
-                .white-turns-taken {
+                .white {
                     -moz-transform: scale(-1, -1);
                     -webkit-transform: scale(-1, -1);
                     -o-transform: scale(-1, -1);
                     -ms-transform: scale(-1, -1);
                     transform: scale(-1, -1);
                     text-align: left;
-                    // display: none;
+                    // display: none; // NOTE: Disable this for one-player mode
                 }
 
-                .black-turns-taken {
+                .black {
                     border-top: 0.2px solid black;
                 }
             }
@@ -99,17 +99,13 @@ page-home {
 
     .signals-container {
         clear: both;
-        // margin: 10px 0;
         height: 70px;
         position: relative;
     }
 
     .signal {
         color: rgb(25,25,25);
-
-        span {
-            font-size: 9px;
-        }
+        font-size: 9px;
 
         iframe {
             overflow: hidden;
@@ -120,7 +116,11 @@ page-home {
         }
     }
 
-    .white-signals-container {
+    .piece.signal {
+        visibility: hidden;
+    }
+
+    .white.signals-container {
         margin-top: 20px;
 
         .signal {
@@ -133,7 +133,7 @@ page-home {
         }
     }
 
-    .white-target-signal, .white-score-signal, .black-target-signal, .black-score-signal {
+    .white.target.signal, .white.score.signal, .black.target.signal, .black.score.signal {
         height: 50px;
         width: 170px;
         position: relative;
@@ -144,11 +144,11 @@ page-home {
         }
     }
 
-    .white-target-signal, .white-score-signal {
+    .white.target.signal, .white.score.signal {
         top: 20px;
     }
 
-    .white-piece-signal, .black-piece-signal {
+    .white.piece.signal, .black.piece.signal {
         height: 70px;
         width: 300px;
         position: absolute;
@@ -160,15 +160,15 @@ page-home {
         }
     }
 
-    .white-piece-signal {
+    .white.piece.signal {
         right: 0px;
     }
 
-    .black-signals-container .signal {
+    .black.signals-container .signal {
         float: left;
     }
 
-    .black-piece-signal {
+    .black.piece.signal {
         left: 0px;
     }
 
@@ -266,6 +266,20 @@ page-home {
             justify-content: center;
             margin: auto;
             border: 1px solid rgb(245, 245, 245);
+
+            button {
+                background-color: transparent;
+                box-shadow: none;
+                border-radius: 0;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            button[disabled] {
+                opacity: 1;
+            }
         }
 
         .square-row:nth-child(1), .square-row:nth-child(8) {
@@ -279,7 +293,7 @@ page-home {
         }
 
         .square-row .blank-square .square-content {
-            background-color: white;
+            background-color: rgba(250,250,250,0.6);
         }
 
         .square-row:nth-child(1) .square:nth-child(1) .square-content {
@@ -303,27 +317,62 @@ page-home {
         }
 
         .square-row .locator .square-content {
+            // background-color: #ffffef;
             background-color: #eefefe;
             color: #dedede;
             // border: none;
-            // border-top: 1px solid rgba(0,0,0,0.1);
 
             button {
-                // background-color: #ffffef;
-                background-color: #eefefe;
-                color: #dedede;
-                box-shadow: none;
-                // border-top: 0.1px solid rgba(0,0,0,0.1);
-                border-radius: 0;
-                margin: 0;
-                padding: 0;
-                width: 100%;
-                height: 100%;
+                background-color: transparent;
+                color: inherit;
             }
+        }
 
-            button[disabled] {
-                opacity: 1;
+        .square-row .A.color-picker .square-content {
+            background-color: white;
+
+            button {
+                width: 80%;
+                height: 80%;
+                background-color: tomato;
+                border-radius: 50%;
             }
+        }
+
+        .square-row .playable .square-content {
+            background-color: rgba(0,0,0,0.1);
+
+            button {
+                border-radius: 50%;
+                width: 80%;
+                height: 80%;
+                border-width: 0.5px;
+                border-style: dashed;
+                border-color: black;
+                clear: both;
+
+                .player-color, .piece-color {
+                    width: 500%;
+                    height: 100%;
+                    float: right;
+                }
+
+                .player-color {
+                    background-color: blue;
+                }
+
+                .piece-color {
+                    background-color: gold;
+                }
+            }
+        }
+
+        .square-row:nth-child(even) .playable:nth-child(even) .square-content {
+            background-color: rgba(0,0,0,0.25);
+        }
+
+        .square-row:nth-child(odd) .playable:nth-child(odd) .square-content {
+            background-color: rgba(0,0,0,0.25);
         }
 
         .square-row .white .square-content {
@@ -332,14 +381,6 @@ page-home {
             -o-transform: scale(-1, -1);
             -ms-transform: scale(-1, -1);
             transform: scale(-1, -1);
-        }
-
-        .square-row:nth-child(even) .playable:nth-child(even) .square-content {
-            background-color: rgb(245, 245, 245);
-        }
-
-        .square-row:nth-child(odd) .playable:nth-child(odd) .square-content {
-            background-color: rgb(245, 245, 245);
         }
     }
 }

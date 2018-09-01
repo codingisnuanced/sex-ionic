@@ -5,6 +5,7 @@ window.onload = ()=> {
     canvas.height = parseInt(iframe.getAttribute("drawHeight"));
     let ctx = canvas.getContext('2d');
     let adjustable = iframe.getAttribute("adjustable") === "true" ? true : false;
+    let events_ = adjustable ? ["mousemove", "mouseout", "click", "touchstart", "touchmove", "touchend"] : []
     let thesignal = new Chart(ctx, {
         type: 'line',
         data: {
@@ -16,13 +17,14 @@ window.onload = ()=> {
                 borderColor: 'rgba(100,100,100,0.4)',
                 borderWidth: 1,
                 lineTension: 0,
-                pointBackgroundColor: ['tomato','yellow','mediumspringgreen','orange','fuchsia','dodgerblue'],
+                pointBackgroundColor: ['Tomato','MediumSpringGreen','Orange','DodgerBlue','Yellow','Fuchsia'],
                 pointBorderColor: 'rgba(0,0,0,0)',
                 pointHitRadius: 20
 
             }]
         },
         options: {
+            events: events_,
             responsive: false,
             dragData: adjustable,
             scales: {
