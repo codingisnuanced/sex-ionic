@@ -21,19 +21,28 @@ sex-app {
     }
 
     ion-menu .menu-inner {
-        -webkit-box-shadow: none!important;
-        box-shadow: none!important;
-        width: 17em;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        width: 18em;
+        border-right: 5px solid rgba(0,0,0,0.85);
         border-top: 1px dashed rgba(0,0,0,0.7);
-        border-right: 2px solid rgba(0,0,0,0.85);
-        background-color: white!important;
-        background-image: linear-gradient(#ffffff, #efefef)!important;
-        background-image: linear-gradient(0deg, transparent 24%, rgba(0, 0, 0, .05) 25%, rgba(0, 0, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 0, 0, .05) 75%, rgba(0, 0, 0, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0, 0, 0, .05) 25%, rgba(0, 0, 0, .05) 26%, transparent 27%, transparent 74%, rgba(0, 0, 0, .05) 75%, rgba(0, 0, 0, .05) 76%, transparent 77%, transparent)!important;
-        // height:100%;
-        background-size:50px 50px!important;
+        border-bottom: 1px dashed rgba(0,0,0,0.7);
+        background-color: white !important;
+        background-image: linear-gradient(#ffffff, #efefef) !important;
+        background-image: linear-gradient(0deg, transparent 24%,
+                            rgba(0, 0, 0, .05) 25%, rgba(0, 0, 0, .05) 26%, transparent 27%, transparent 74%,
+                            rgba(0, 0, 0, .05) 75%, rgba(0, 0, 0, .05) 76%, transparent 77%, transparent),
+                            linear-gradient(90deg, transparent 24%,
+                            rgba(0, 0, 0, .05) 25%, rgba(0, 0, 0, .05) 26%, transparent 27%, transparent 74%,
+                            rgba(0, 0, 0, .05) 75%, rgba(0, 0, 0, .05) 76%, transparent 77%, transparent) !important;
+        background-size: 50px 50px !important;
 
-        * {
-            background-color: rgba(0,0,0,0)!important;
+        ion-content, ion-item, button {
+            background-color: rgba(0,0,0,0) !important;
+        }
+
+        ion-toggle {
+            zoom: 0.6 !important;
         }
     }
 
@@ -42,14 +51,18 @@ sex-app {
 
         ion-list ion-item {
             height: 1em;
-            padding: 0;
+            border-bottom: 0.5 dashed rgba(0,0,0,0.6) !important;
 
             button {
                 padding: 10px;
+            }
 
-                ion-icon {
-                    padding-top: 10px;
-                }
+            ion-icon {
+                vertical-align: text-bottom;
+            }
+
+            .item-inner {
+                border-bottom: 0.5 dotted rgba(0,0,0,0.6) !important;
             }
         }
 
@@ -89,50 +102,70 @@ sex-app {
             }
         }
 
-        ion-list ion-item .controls-container {
-            width: 100%;
-            height: 100%;
-            font-family: 'Times New Roman', serif;
-            margin-top: 20px;
-
-            .control {
-                width: calc(100%/3);
-                height: 100%;
-                float: left;
-                position: relative;
-            }
-        }
-
-        ion-list ion-item .num-player-icon, ion-list ion-item .intui-logic-icon {
-            font-weight: bold;
-            margin-right: 0.5em;
-        }
-
-        ion-list ion-item .menu-item-text {
+        .menu-item-text {
             font-size: 14px;
+            text-decoration: underline;
+            text-decoration-style: dotted;
         }
 
-        ion-list ion-item .heading {
+        .menu-item-text.button-text {
+            text-decoration: underline;
+            border-bottom: 0.2px solid black;
+        }
+
+        .heading {
             font-size: 16px;
         }
 
-        ion-list ion-item ion-toggle {
-            zoom: 0.6;
+        .item-with-info {
+            clear: both;
+
+            button:hover .menu-item-text, button:active .menu-item-text {
+                border-bottom: none;
+                text-decoration: none;
+            }
+
+            button:first-child {
+                float: left;
+                width: 80%;
+                text-align: left;
+            }
+
+            button:nth-child(2) {
+                float: right;
+                padding-right: 0;
+                width: 20%;
+            }
         }
 
-        ion-list ion-item .intui-logic-container {
+        .intuition-logic-container {
             width: 100%;
             height: 100%;
+            padding-left: 10px;
             font-family: 'Times New Roman', serif;
 
             .control {
                 height: 100%;
             }
 
-            .intui-logic-selected {
-                border: 1px dashed black;
-                border-radius: 0%;
+            .intuition-logic-selected {
+                border-bottom: 1px dotted rgba(0,0,0,0.5);
+                background-image: linear-gradient(#ffffff, rgb(240,240,240));
             }
+
+            button[disabled] {
+                opacity: 1.0;
+            }
+
+            span {
+                margin: 0px 20px;
+                opacity: 0.6;
+            }
+        }
+
+        .num-player-icon, .intuition-logic-icon {
+            font-weight: bold;
+            margin-right: 0.5em;
         }
     }
 }

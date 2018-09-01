@@ -52,7 +52,7 @@
             "width":0.3
             },
         "move":{
-            "enable":true,
+            "enable":false,
             "speed":0.7,
             "direction":"none",
             "random":true,

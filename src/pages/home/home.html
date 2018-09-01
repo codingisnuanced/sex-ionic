@@ -2,7 +2,7 @@
     <header>
         <ion-grid>
             <ion-row>
-                <ion-col col-6>
+                <ion-col col-5>
                     <div class="branding">
                         <h6>
                             <span class="title"><img src="assets/imgs/tosoto-logo.png" alt="Tosoto Labs">Sex</span>
@@ -21,6 +21,12 @@
                         <button class="control" ion-button-small icon-only clear><ion-icon ios="md-share" md="md-share"></ion-icon></button>
                         <button class="control" ion-button-small icon-only clear><ion-icon name="refresh"></ion-icon></button>
                     </div>
+                    <div class="turns-taken">
+                        <div class="valign-fix">
+                            <div class="white-turns-taken">0 | moves</div>
+                            <div class="black-turns-taken">moves | 0</div>
+                        </div>
+                    </div>
                 </ion-col>
             </ion-row>
         </ion-grid>
@@ -32,80 +38,33 @@
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
         </div>
         <div class="signal white-score-signal">
-            <span>White score signal</span><br>
+            <span>Score signal | 67.54%</span><br>
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
         </div>
         <div class="signal white-piece-signal">
-            <span>E4 signal</span>
+            <span>E4 signal | 67.54</span>
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="300" drawHeight="70" adjustable="true"></iframe>
         </div>
     </div>
 
     <div class="board-container">
         <div class="square-row">
+            <div class="piece-viewer black">
+                <div class="piece-color">
+                    <span>E4</span>
+                </div>
+                <div class="piece-color-amount">
+                    <span>0.968653520968653520968653</span> <!-- 9 decimal places; 24 max -->
+                </div>
+            </div>
             <div class="square blank-square"><div class="square-content"></div></div>
-            <div class="square locator"><div class="square-content">A</div></div>
-            <div class="square locator"><div class="square-content">B</div></div>
-            <div class="square locator"><div class="square-content">C</div></div>
-            <div class="square locator"><div class="square-content">D</div></div>
-            <div class="square locator"><div class="square-content">E</div></div>
-            <div class="square locator"><div class="square-content">F</div></div>
+            <div class="square locator"><div class="square-content"><button disabled ion-button>A</button></div></div>
+            <div class="square locator"><div class="square-content"><button disabled ion-button>B</button></div></div>
+            <div class="square locator"><div class="square-content"><button disabled ion-button>C</button></div></div>
+            <div class="square locator"><div class="square-content"><button disabled ion-button>D</button></div></div>
+            <div class="square locator"><div class="square-content"><button disabled ion-button>E</button></div></div>
+            <div class="square locator"><div class="square-content"><button disabled ion-button>F</button></div></div>
             <div class="square blank-square"><div class="square-content"></div></div>
-        </div>
-
-        <div class="square-row">
-            <div class="square locator"><div class="square-content">0</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square locator opponent"><div class="square-content">0</div></div>
-        </div>
-
-        <div class="square-row">
-            <div class="square locator"><div class="square-content">1</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square locator opponent"><div class="square-content">1</div></div>
-        </div>
-
-        <div class="square-row">
-            <div class="square locator"><div class="square-content">2</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square locator opponent"><div class="square-content">2</div></div>
-        </div>
-
-        <div class="square-row">
-            <div class="square locator"><div class="square-content">3</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square locator opponent"><div class="square-content">3</div></div>
-        </div>
-
-        <div class="square-row">
-            <div class="square locator"><div class="square-content">4</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square locator opponent"><div class="square-content">4</div></div>
         </div>
 
         <div class="square-row">
@@ -116,17 +75,80 @@
             <div class="square playable"><div class="square-content">[I]</div></div>
             <div class="square playable"><div class="square-content">[I]</div></div>
             <div class="square playable"><div class="square-content">[I]</div></div>
-            <div class="square locator opponent"><div class="square-content">5</div></div>
+            <div class="square locator white"><div class="square-content">5</div></div>
         </div>
 
         <div class="square-row">
+            <div class="square locator"><div class="square-content">4</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square locator white"><div class="square-content">4</div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="square locator"><div class="square-content">3</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square locator white"><div class="square-content">3</div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="square locator"><div class="square-content">2</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square locator white"><div class="square-content">2</div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="square locator"><div class="square-content">1</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square locator white"><div class="square-content">1</div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="square locator"><div class="square-content">0</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square playable"><div class="square-content">[I]</div></div>
+            <div class="square locator white"><div class="square-content">0</div></div>
+        </div>
+
+        <div class="square-row">
+            <div class="piece-viewer white">
+                <div class="piece-color">
+                    <span>E4</span>
+                </div>
+                <div class="piece-color-amount">
+                    <span>0.968653520968653520968653</span> <!-- 9 decimal places; 24 max -->
+                </div>
+            </div>
             <div class="square blank-square"><div class="square-content"></div></div>
-            <div class="square locator opponent"><div class="square-content">A</div></div>
-            <div class="square locator opponent"><div class="square-content">B</div></div>
-            <div class="square locator opponent"><div class="square-content">C</div></div>
-            <div class="square locator opponent"><div class="square-content">D</div></div>
-            <div class="square locator opponent"><div class="square-content">E</div></div>
-            <div class="square locator opponent"><div class="square-content">F</div></div>
+            <div class="square locator white"><div class="square-content"><button disabled ion-button>A</button></div></div>
+            <div class="square locator white"><div class="square-content"><button disabled ion-button>B</button></div></div>
+            <div class="square locator white"><div class="square-content"><button disabled ion-button>C</button></div></div>
+            <div class="square locator white"><div class="square-content"><button disabled ion-button>D</button></div></div>
+            <div class="square locator white"><div class="square-content"><button disabled ion-button>E</button></div></div>
+            <div class="square locator white"><div class="square-content"><button disabled ion-button>F</button></div></div>
             <div class="square blank-square"><div class="square-content"></div></div>
         </div>
     </div>
@@ -137,11 +159,11 @@
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
         </div>
         <div class="signal black-score-signal">
-            <span>Black score signal</span><br>
+            <span>Score signal | 67.54%</span><br>
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="170" drawHeight="50" adjustable="false"></iframe>
         </div>
         <div class="signal black-piece-signal">
-            <span>E4 signal</span>
+            <span>E4 signal | 67.54%</span>
             <iframe src="assets/templates/signal.html" frameBorder="0" drawWidth="300" drawHeight="70" adjustable="true"></iframe>
         </div>
     </div>
