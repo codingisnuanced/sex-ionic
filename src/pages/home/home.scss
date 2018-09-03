@@ -6,6 +6,11 @@ page-home {
 
     ion-content {
         padding: 0!important;
+        border: 1px dashed black;
+
+        .scroll-content {
+            overflow: auto;
+        }
     }
 
     header {
@@ -31,16 +36,16 @@ page-home {
                     font-size: 10px;
                     color: rgb(25,25,25);
 
-                    a:hover, a:active {
-                        text-decoration: none;
-                        border-bottom: none;
-                    }
-
                     a:link, a:visited {
                         color: rgb(25,25,25);
                         text-decoration: underline;
                         text-decoration-style: dotted;
                         border-bottom: 0.2px solid black;
+                    }
+
+                    a:hover, a:active {
+                        text-decoration: none;
+                        border-bottom: none;
                     }
                 }
             }
@@ -60,7 +65,8 @@ page-home {
                 float: right;
                 width: 30%;
                 text-align: right;
-                font-size: 9px;
+                font-size: 8px;
+                // font-weight: bold;
                 height: 100%;
                 display: table;
 
@@ -328,7 +334,7 @@ page-home {
             }
         }
 
-        .square-row .A.color-picker .square-content {
+        .A.color-picker.square .square-content {
             background-color: white;
 
             button {
@@ -339,7 +345,7 @@ page-home {
             }
         }
 
-        .square-row .playable .square-content {
+        .playable.square .square-content {
             background-color: rgba(0,0,0,0.1);
 
             button {
@@ -352,9 +358,10 @@ page-home {
                 clear: both;
 
                 .player-color, .piece-color {
-                    width: 500%;
+                    width: 100%;
                     height: 100%;
                     float: right;
+                    // position: relative;
                 }
 
                 .player-color {
@@ -364,14 +371,33 @@ page-home {
                 .piece-color {
                     background-color: gold;
                 }
+
+                .piece-selection {
+                    border-radius: 50%;
+                    width: 7px;
+                    height: 7px;
+                    margin-top: 70%;
+                }
+
+                .black.piece-selection {
+                    background-color: black;
+                    border: 0.2px dotted white;
+                    float: right;
+                }
+
+                .white.piece-selection {
+                    background-color: white;
+                    border: 0.2px dotted black;
+                    float: left;
+                }
             }
         }
 
-        .square-row:nth-child(even) .playable:nth-child(even) .square-content {
+        .square-row:nth-child(even) .playable.square:nth-child(even) .square-content {
             background-color: rgba(0,0,0,0.25);
         }
 
-        .square-row:nth-child(odd) .playable:nth-child(odd) .square-content {
+        .square-row:nth-child(odd) .playable.square:nth-child(odd) .square-content {
             background-color: rgba(0,0,0,0.25);
         }
 

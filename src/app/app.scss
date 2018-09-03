@@ -51,7 +51,6 @@ sex-app {
 
         ion-list ion-item {
             height: 1em;
-            border-bottom: 0.5 dashed rgba(0,0,0,0.6) !important;
 
             button {
                 padding: 10px;
@@ -61,8 +60,16 @@ sex-app {
                 vertical-align: text-bottom;
             }
 
-            .item-inner {
-                border-bottom: 0.5 dotted rgba(0,0,0,0.6) !important;
+            a:link, a:visited {
+                color: black;
+                text-decoration: underline;
+                text-decoration-style: dotted;
+                border-bottom: 0.2px solid black;
+            }
+
+            a:hover, a:active {
+                border-bottom: none;
+                text-decoration: none;
             }
         }
 
@@ -83,14 +90,6 @@ sex-app {
                 .description, .site-link {
                     font-size: 10px;
                     color: rgb(25,25,25);
-
-                    a:hover, a:active {
-                        text-decoration: none;
-                    }
-
-                    a:link, a:visited {
-                        color: rgb(25,25,25);;
-                    }
                 }
             }
 
@@ -117,7 +116,7 @@ sex-app {
             font-size: 16px;
         }
 
-        .item-with-info {
+        .item-with-rules {
             clear: both;
 
             button:hover .menu-item-text, button:active .menu-item-text {
@@ -135,6 +134,18 @@ sex-app {
                 float: right;
                 padding-right: 0;
                 width: 20%;
+
+                ion-icon {
+                    border-bottom: 0.98px dotted black;
+                    padding-bottom: 3px;
+                    transform: scale(0.7);
+                }
+            }
+
+            button:nth-child(2):hover, button:nth-child(2):active {
+                ion-icon {
+                    border-color: rgba(0,0,0,0);
+                }
             }
         }
 
