@@ -1,4 +1,4 @@
-<ion-content padding no-bounce id="page-home-content">
+<ion-content padding no-bounce id="page-home-content" clas>
     <header>
         <ion-grid>
             <ion-row>
@@ -19,7 +19,7 @@
                     <div class="controls-container">
                         <button class="control" ion-button-small icon-only clear menuToggle><ion-icon name="more"></ion-icon></button>
                         <button class="control" ion-button-small icon-only clear><ion-icon ios="md-share" md="md-share"></ion-icon></button>
-                        <button class="control" ion-button-small icon-only clear><ion-icon name="refresh"></ion-icon></button>
+                        <button class="control" ion-button-small icon-only clear><ion-icon name="ios-bookmark"></ion-icon></button>
                     </div>
                     <div class="turns-taken">
                         <div class="valign-fix">
@@ -31,6 +31,8 @@
             </ion-row>
         </ion-grid>
     </header>
+
+    <p class="error-log"></p>
 
     <div class="signals-container white">
         <div class="signal white target">
@@ -58,63 +60,81 @@
                 </div>
             </div>
             <div class="square blank-square"><div class="square-content"></div></div>
-            <div class="square locator A color-picker"><div class="square-content"><button disabled ion-button>A</button></div></div>
-            <div class="square locator B color-picker"><div class="square-content"><button disabled ion-button>B</button></div></div>
-            <div class="square locator C color-picker"><div class="square-content"><button disabled ion-button>C</button></div></div>
-            <div class="square locator D color-picker"><div class="square-content"><button disabled ion-button>D</button></div></div>
-            <div class="square locator E color-picker"><div class="square-content"><button disabled ion-button>E</button></div></div>
-            <div class="square locator F color-picker"><div class="square-content"><button disabled ion-button>F</button></div></div>
+            <div class="square locator A color-picker"><div class="square-content"><button disabled>A</button></div></div>
+            <div class="square locator B color-picker"><div class="square-content"><button disabled>B</button></div></div>
+            <div class="square locator C color-picker"><div class="square-content"><button disabled>C</button></div></div>
+            <div class="square locator D color-picker"><div class="square-content"><button disabled>D</button></div></div>
+            <div class="square locator E color-picker"><div class="square-content"><button disabled>E</button></div></div>
+            <div class="square locator F color-picker"><div class="square-content"><button disabled>F</button></div></div>
             <div class="square blank-square"><div class="square-content"></div></div>
         </div>
 
         <div class="square-row">
             <div class="square locator five"><div class="square-content">5</div></div>
-            <div class="square A5 playable">
+            <div class="square A5 playable" letter="A" letterIndex="0" number="5">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square B5 playable">
+            <div class="square B5 playable" letter="B" letterIndex="1" number="5">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square C5 playable">
+            <div class="square C5 playable" letter="C" letterIndex="2" number="5">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square D5 playable">
+            <div class="square D5 playable" letter="D" letterIndex="3" number="5">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square E5 playable">
+            <div class="square E5 playable" letter="E" letterIndex="4" number="5">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square F5 playable">
+            <div class="square F5 playable" letter="F" letterIndex="5" number="5">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="square locator five white"><div class="square-content">5</div></div>
@@ -122,52 +142,70 @@
 
         <div class="square-row">
             <div class="square locator four"><div class="square-content">4</div></div>
-            <div class="square A4 playable">
+            <div class="square A4 playable" letter="A" letterIndex="0" number="4">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square B4 playable">
+            <div class="square B4 playable" letter="B" letterIndex="1" number="4">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square C4 playable">
+            <div class="square C4 playable" letter="C" letterIndex="2" number="4">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square D4 playable">
+            <div class="square D4 playable" letter="D" letterIndex="3" number="4">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square E4 playable">
+            <div class="square E4 playable" letter="E" letterIndex="4" number="4">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square F4 playable">
+            <div class="square F4 playable" letter="F" letterIndex="5" number="4">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="square locator four white"><div class="square-content">4</div></div>
@@ -175,52 +213,70 @@
 
         <div class="square-row">
             <div class="square locator three"><div class="square-content">3</div></div>
-            <div class="square A3 playable">
+            <div class="square A3 playable" letter="A" letterIndex="0" number="3">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square B3 playable">
+            <div class="square B3 playable" letter="B" letterIndex="1" number="3">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square C3 playable">
+            <div class="square C3 playable" letter="C" letterIndex="2" number="3">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square D3 playable">
+            <div class="square D3 playable" letter="D" letterIndex="3" number="3">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square E3 playable">
+            <div class="square E3 playable" letter="E" letterIndex="4" number="3">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square F3 playable">
+            <div class="square F3 playable" letter="F" letterIndex="5" number="3">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="square locator three white"><div class="square-content">3</div></div>
@@ -228,52 +284,70 @@
 
         <div class="square-row">
             <div class="square locator two"><div class="square-content">2</div></div>
-            <div class="square A2 playable">
+            <div class="square A2 playable" letter="A" letterIndex="0" number="2">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square B2 playable">
+            <div class="square B2 playable" letter="B" letterIndex="1" number="2">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square C2 playable">
+            <div class="square C2 playable" letter="C" letterIndex="2" number="2">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square D2 playable">
+            <div class="square D2 playable" letter="D" letterIndex="3" number="2">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square E2 playable">
+            <div class="square E2 playable" letter="E" letterIndex="4" number="2">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square F2 playable">
+            <div class="square F2 playable" letter="F" letterIndex="5" number="2">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="square locator two white"><div class="square-content">2</div></div>
@@ -281,52 +355,70 @@
 
         <div class="square-row">
             <div class="square locator one"><div class="square-content">1</div></div>
-            <div class="square A1 playable">
+            <div class="square A1 playable" letter="A" letterIndex="0" number="1">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square B1 playable">
+            <div class="square B1 playable" letter="B" letterIndex="1" number="1">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square C1 playable">
+            <div class="square C1 playable" letter="C" letterIndex="2" number="1">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square D1 playable">
+            <div class="square D1 playable" letter="D" letterIndex="3" number="1">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square E1 playable">
+            <div class="square E1 playable" letter="E" letterIndex="4" number="1">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square F1 playable">
+            <div class="square F1 playable" letter="F" letterIndex="5" number="1">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="square locator one white"><div class="square-content">1</div></div>
@@ -334,52 +426,70 @@
 
         <div class="square-row">
             <div class="square locator zero"><div class="square-content">0</div></div>
-            <div class="square A0 playable">
+            <div class="square A0 playable" letter="A" letterIndex="0" number="0">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square B0 playable">
+            <div class="square B0 playable" letter="B" letterIndex="1" number="0">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square C0 playable">
+            <div class="square C0 playable" letter="C" letterIndex="2" number="0">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square D0 playable">
+            <div class="square D0 playable" letter="D" letterIndex="3" number="0">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square E0 playable">
+            <div class="square E0 playable" letter="E" letterIndex="4" number="0">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="square F0 playable">
+            <div class="square F0 playable" letter="F" letterIndex="5" number="0">
                 <div class="square-content">
-                    <button ion-button>
-                        <div class="player-color"><div class="piece-selection black"></div></div>
-                        <div class="piece-color"><div class="piece-selection white"></div></div>
-                    </button>
+                    <div class="piece">
+                        <button class="touch-area" (tap)="pieceTap($event)" (press)="piecePress($event)"></button>
+                        <div class="coloring">
+                            <div class="player-color"><div class="piece-selection"></div></div>
+                            <div class="piece-color"><div class="piece-selection"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="square locator zero white"><div class="square-content">0</div></div>
@@ -395,12 +505,12 @@
                 </div>
             </div>
             <div class="square blank-square"><div class="square-content"></div></div>
-            <div class="square locator A color-picker white"><div class="square-content"><button disabled ion-button>A</button></div></div>
-            <div class="square locator B color-picker white"><div class="square-content"><button disabled ion-button>B</button></div></div>
-            <div class="square locator C color-picker white"><div class="square-content"><button disabled ion-button>C</button></div></div>
-            <div class="square locator D color-picker white"><div class="square-content"><button disabled ion-button>D</button></div></div>
-            <div class="square locator E color-picker white"><div class="square-content"><button disabled ion-button>E</button></div></div>
-            <div class="square locator F color-picker white"><div class="square-content"><button disabled ion-button>F</button></div></div>
+            <div class="square locator A color-picker white"><div class="square-content"><button disabled>A</button></div></div>
+            <div class="square locator B color-picker white"><div class="square-content"><button disabled>B</button></div></div>
+            <div class="square locator C color-picker white"><div class="square-content"><button disabled>C</button></div></div>
+            <div class="square locator D color-picker white"><div class="square-content"><button disabled>D</button></div></div>
+            <div class="square locator E color-picker white"><div class="square-content"><button disabled>E</button></div></div>
+            <div class="square locator F color-picker white"><div class="square-content"><button disabled>F</button></div></div>
             <div class="square blank-square"><div class="square-content"></div></div>
         </div>
     </div>

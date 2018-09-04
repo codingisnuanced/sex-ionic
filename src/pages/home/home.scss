@@ -1,3 +1,12 @@
+$blackPrimary: rgb(40,40,40);
+$whitePrimary: rgb(255,255,255);
+$sexRed: Red;
+$sexGreen: MediumSpringGreen;
+$sexOrange: Orange;
+$sexBlue: DodgerBlue;
+$sexYellow: Yellow;
+$sexPurple: Fuchsia;
+
 page-home {
 
     * {
@@ -76,17 +85,22 @@ page-home {
                 }
 
                 .white {
-                    -moz-transform: scale(-1, -1);
-                    -webkit-transform: scale(-1, -1);
-                    -o-transform: scale(-1, -1);
-                    -ms-transform: scale(-1, -1);
                     transform: scale(-1, -1);
                     text-align: left;
-                    // display: none; // NOTE: Disable this for one-player mode
                 }
 
                 .black {
                     border-top: 0.2px solid black;
+                }
+            }
+
+            .turns-taken.one-player {
+                .black {
+                    border-top: none;
+                }
+
+                .white {
+                    display: none;
                 }
             }
             .controls-container {
@@ -130,13 +144,13 @@ page-home {
         margin-top: 20px;
 
         .signal {
-            -moz-transform: scale(-1, -1);
-            -webkit-transform: scale(-1, -1);
-            -o-transform: scale(-1, -1);
-            -ms-transform: scale(-1, -1);
             transform: scale(-1, -1);
             float: right;
         }
+    }
+
+    .white.signals-container.one-player {
+        display: none;
     }
 
     .white.target.signal, .white.score.signal, .black.target.signal, .black.score.signal {
@@ -235,10 +249,6 @@ page-home {
         }
 
         .piece-viewer.white {
-            -moz-transform: scale(-1, -1);
-            -webkit-transform: scale(-1, -1);
-            -o-transform: scale(-1, -1);
-            -ms-transform: scale(-1, -1);
             transform: scale(-1, -1);
 
             .piece-color {
@@ -326,7 +336,6 @@ page-home {
             // background-color: #ffffef;
             background-color: #eefefe;
             color: #dedede;
-            // border: none;
 
             button {
                 background-color: transparent;
@@ -335,12 +344,12 @@ page-home {
         }
 
         .A.color-picker.square .square-content {
-            background-color: white;
+            background-color: transparent;
 
             button {
                 width: 80%;
                 height: 80%;
-                background-color: tomato;
+                background-color: $sexRed;
                 border-radius: 50%;
             }
         }
@@ -348,47 +357,157 @@ page-home {
         .playable.square .square-content {
             background-color: rgba(0,0,0,0.1);
 
-            button {
+            .piece {
                 border-radius: 50%;
-                width: 80%;
-                height: 80%;
-                border-width: 0.5px;
-                border-style: dashed;
-                border-color: black;
-                clear: both;
+                width: 70%;
+                height: 70%;
+                overflow: hidden;
 
-                .player-color, .piece-color {
+                .touch-area {
                     width: 100%;
                     height: 100%;
-                    float: right;
-                    // position: relative;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
                 }
 
+                .touch-area.possible-move {
+                    background-color: rgba(245,245,229,1);
+                }
+
+                .coloring {
+                    border-radius: 50%;
+                    width: 100%;
+                    height: 100%;
+                    clear: both;
+                }
+
+                .player-color, .piece-color {
+                    width: 50%;
+                    height: 100%;
+                    float: left;
+                }
+
+                .player-color .piece-selection, .piece-color .piece-selection {
+                    border-radius: 50%;
+                    width: 6px;
+                    height: 6px;
+                    margin-top: 65%;
+                }
+            }
+
+            .piece.black-selection[pieceSide="black"] {
+                .piece-color .piece-selection {
+                    background-color: $blackPrimary;
+                    border: 0.2px groove gray;
+                    float: left;
+                }
+            }
+
+            .piece.white-selection[pieceSide="black"] {
+                .player-color .piece-selection {
+                    background-color: $whitePrimary;
+                    border: 0.2px groove gray;
+                    float: right;
+                }
+            }
+
+            .piece.black-selection[pieceSide="white"] {
+                .player-color .piece-selection {
+                    background-color: $blackPrimary;
+                    border: 0.2px groove gray;
+                    float: right;
+                }
+            }
+
+            .piece.white-selection[pieceSide="white"] {
+                .piece-color .piece-selection {
+                    background-color: $whitePrimary;
+                    border: 0.2px groove gray;
+                    float: left;
+                }
+            }
+
+            .piece[pieceSide] {
+                border-width: 1px;
+                border-style: dashed;
+                border-color: Black;
+            }
+
+            .piece.disturbed {
+                border-style: groove;
+            }
+
+            .piece[pieceSide="black"] {
                 .player-color {
-                    background-color: blue;
+                    background-color: $blackPrimary;
+                    border-right: 0.5px dashed $whitePrimary;
                 }
 
                 .piece-color {
-                    background-color: gold;
+                    border-left: 0.5px dashed $whitePrimary;
+                }
+            }
+
+            .piece[pieceSide="white"] {
+                transform: scale(-1, -1);
+
+                .player-color {
+                    background-color: $whitePrimary;
+                    border-right: 0.5px dashed $blackPrimary;
                 }
 
-                .piece-selection {
-                    border-radius: 50%;
-                    width: 7px;
-                    height: 7px;
-                    margin-top: 70%;
+                .piece-color {
+                    border-left: 0.5px dashed $blackPrimary;
                 }
+            }
 
-                .black.piece-selection {
-                    background-color: black;
-                    border: 0.2px dotted white;
-                    float: right;
+            .piece[pieceColor="black"] {
+                .piece-color {
+                    background-color: $blackPrimary;
                 }
+            }
 
-                .white.piece-selection {
-                    background-color: white;
-                    border: 0.2px dotted black;
-                    float: left;
+            .piece[pieceColor="white"] {
+                .piece-color {
+                    background-color: $whitePrimary;
+                }
+            }
+
+            .piece[pieceColor="red"] {
+                .piece-color {
+                    background-color: $sexRed;
+                }
+            }
+
+            .piece[pieceColor="green"] {
+                .piece-color {
+                    background-color: $sexGreen;
+                }
+            }
+
+            .piece[pieceColor="orange"] {
+                .piece-color {
+                    background-color: $sexOrange;
+                }
+            }
+
+            .piece[pieceColor="blue"] {
+                .piece-color {
+                    background-color: $sexBlue;
+                }
+            }
+
+            .piece[pieceColor="yellow"] {
+                .piece-color {
+                    background-color: $sexYellow;
+                }
+            }
+
+            .piece[pieceColor="purple"] {
+                .piece-color {
+                    background-color: $sexPurple;
                 }
             }
         }
@@ -402,10 +521,6 @@ page-home {
         }
 
         .square-row .white .square-content {
-            -moz-transform: scale(-1, -1);
-            -webkit-transform: scale(-1, -1);
-            -o-transform: scale(-1, -1);
-            -ms-transform: scale(-1, -1);
             transform: scale(-1, -1);
         }
     }

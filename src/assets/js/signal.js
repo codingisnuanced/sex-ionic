@@ -17,7 +17,7 @@ window.onload = ()=> {
                 borderColor: 'rgba(100,100,100,0.4)',
                 borderWidth: 1,
                 lineTension: 0,
-                pointBackgroundColor: ['Tomato','MediumSpringGreen','Orange','DodgerBlue','Yellow','Fuchsia'],
+                pointBackgroundColor: ['Red','MediumSpringGreen','Orange','DodgerBlue','Yellow','Fuchsia'],
                 pointBorderColor: 'rgba(0,0,0,0)',
                 pointHitRadius: 20
 
