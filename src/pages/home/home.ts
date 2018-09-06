@@ -21,15 +21,15 @@ export class HomePage {
 
         window.addEventListener('message', console.log);
 
-        // let sig1 = [0.1,0.2,0.3,0.4,0.5,0.6],
+        let sig1 = [0.1,0.2,0.3,0.4,0.5,0.6],
         // let sig1 = [1,2,1,2,1,2],
             // sig2 = [0.24,0.942,0.85,0.324,0.63,0.1274];
             // sig2 = [0.1,0.2,0.3,0.4,0.5,0.6];
-            // sig2 = [0.6,0.5,0.4,0.3,0.2,0.1];
+            sig2 = [0.6,0.5,0.4,0.3,0.2,0.1];
             // sig2 = [0,0,0,0,0,0];
             // sig2 = [2,2,2,2,2,2];
-        let sig1 = [1,2,3,4,5,6,7,8,9,10,11,12],
-            sig2 = [12,11,10,9,8,7,6,5,4,3,2,1];
+        // let sig1 = [1,2,3,4,5,6,7,8,9,10,11,12],
+        //     sig2 = [12,11,10,9,8,7,6,5,4,3,2,1];
             // sig2 = [0,0,0,0,0,0];
         // let sig1 = [1,3,5,7,9,11],
         //     sig2 = [11,9,7,5,3,1];
@@ -49,7 +49,7 @@ export class HomePage {
         //     sig2 = [1,2,4,7,11,169];
         // let sig1 = [2,4,6,8,10,12],
         //     sig2 = [41224,6124,232,53432,743,624];
-        console.log("correlation:", calculateCorrelation(sig1,sig2));
+        console.log("correlation:", calculateCorrelation(sig1,sig2,false,true));
     }
 
     ngAfterViewInit() {
@@ -61,8 +61,26 @@ export class HomePage {
         this.boardSquares = setupBoard(gatherBoardSquares(), this.isSimpleMode, true);
 
         setTimeout(()=> {
-            document.querySelector('iframe').contentWindow.postMessage({message: 'Send forth The Signal'}, "*");
+            // document.querySelector('iframe').contentWindow.postMessage({message: 'Send forth The Signal'}, "*");
         }, 2000);
+
+        let sig1 = [0.1,0.2,0.3,0.4,0.5,0.6];
+        let errorlog = document.querySelector('.error-log');
+        let html = '';
+        let i = 0;
+        let corrs = perms(sig1).map((perm)=> {
+            html+=i+'&emsp;';
+            html+=calculateCorrelation(sig1,perm,false,true) + '<br>';
+            // html+=calculateCorrelation(sig1,perm,false,true) + '&emsp;';
+            // html+=calculateCorrelation(sig1,perm,true,true) + '<br>';
+            // if(i === 0 || i === 120 || i === 240 || i === 360 || i === 480 || i === 600) {
+            //     console.log(i,perm);
+            // }
+            // html+=calculateCorrelation(sig1,[Math.random(),Math.random(),Math.random(),Math.random(),Math.random(),Math.random()],false,true)+'<br>';
+            i++;
+        });
+        errorlog.innerHTML=html;
+        console.log(html);
     }
 
     // pieceTap(e) {
@@ -161,7 +179,7 @@ let processSignalChange = (index: number, value: number, selection: BoardSquare,
     // return updated board square (?)
 }
 
-let calculateCorrelation = (signal: number[], targetSignal: number[])=> {
+let calculateCorrelation = (signal: number[], targetSignal: number[], diversityIsRelative: boolean, useDistance: boolean)=> {
     let g = [], gavgs = [], sum = 0;
     signal = normalize(signal);
     targetSignal = normalize(targetSignal);
@@ -174,33 +192,61 @@ let calculateCorrelation = (signal: number[], targetSignal: number[])=> {
         gavgs.push(0);
     }
 
-    console.log(signal,targetSignal);
+    // console.log(signal,targetSignal);
 
     for (let i = 0; i < signal.length; i++) {
         for (let j = i+1; j < signal.length; j++) {
-            // if (i===j) continue;
-            let diff = Math.abs((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]))/Math.abs(i-j);
-            // let diff = Math.abs((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]));
+            let diff = 0;
+            if (useDistance) {
+                diff = Math.abs((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]))/Math.abs(i-j);
+            } else {
+                diff = Math.abs((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]));
+            }
 
             // let diff = ((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]))/Math.abs(i-j);
             // let diff = (signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]);
 
             // let diff = (Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]))/Math.abs(i-j);
             // let diff = Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]);
-            console.log(signal[i],signal[j],targetSignal[i],targetSignal[j],Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]));
+            // console.log(signal[i],signal[j],targetSignal[i],targetSignal[j],Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]));
+            // console.log(Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]));
             g[i][j] = g[j][i] = diff;
         }
         gavgs[i] = g[i].reduce((t,n)=> t+n)/(signal.length-1);
         sum+=g[i].reduce((t,n)=> t+n);
     }
-    console.log(g);
-    // let divdiff = gavgs.reduce((t,n)=>t+n)/signal.length,
-    let divdiff = sum/(signal.length*(signal.length-1)/2),
-    // let divdiff = sum/(signal.length*(signal.length)),
-        corr = 1-Math.abs(divdiff);
-    console.log('divdiff', divdiff);
-    console.log('corr', corr);
+    // console.log(g);
+    let progDivDiff = 0;
+    if (diversityIsRelative) {
+        progDivDiff = sum/(signal.length*(signal.length-1)/2);
+    } else {
+        progDivDiff = gavgs.reduce((t,n)=>t+n)/signal.length;
+    }
+    let corr = 1-Math.abs(progDivDiff);
+    // console.log('progDivDiff', progDivDiff);
+    // console.log('corr', corr);
     return Math.max(0,Math.min(1,corr));
+}
+
+let perms = (signal: number[])=> {
+    let ps = [];
+
+    // console.log(signal);
+
+    for (let i = 0; i < signal.length; i++) {
+        let signal_ = signal.slice(0,signal.length);
+        signal_.splice(i,1);
+        let subps = perms(signal_);
+        if (subps.length == 0) subps.push([]);
+        subps.forEach((subp)=> {
+            subp.unshift(signal[i]);
+            ps.push(subp);
+        });
+    }
+
+    // console.log('ps',ps);
+
+    return ps;
 }
 
 let normalize = (arr: number[])=> {
