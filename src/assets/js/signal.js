@@ -5,7 +5,7 @@ window.onload = ()=> {
     canvas.height = parseInt(iframe.getAttribute("drawHeight"));
     let ctx = canvas.getContext('2d');
     let adjustable = iframe.getAttribute("adjustable") === "true" ? true : false;
-    let events_ = adjustable ? ["mousemove", "mouseout", "click", "touchstart", "touchmove", "touchend"] : []
+    let events = adjustable ? ["mousemove", "mouseout", "click", "touchstart", "touchmove", "touchend"] : []
     let thesignal = new Chart(ctx, {
         type: 'line',
         data: {
@@ -24,7 +24,7 @@ window.onload = ()=> {
             }]
         },
         options: {
-            events: events_,
+            events: events,
             responsive: false,
             dragData: adjustable,
             scales: {
@@ -67,6 +67,11 @@ window.onload = ()=> {
                     console.log(e,datasetIndex,index,value);
                     thesignal.data.labels[index] = ''+Math.round(value*100)/100;
                     thesignal.update();
+                    window.parent.postMessage({
+                        tag:'signalDrag',
+                        index: index,
+                        value: value
+                    });
                 }
             },
             onDragEnd: (e,datasetIndex, index, value)=> {
@@ -74,6 +79,11 @@ window.onload = ()=> {
                     console.log(e,datasetIndex,index,value);
                     thesignal.data.labels[index] = ''+Math.round(value*100)/100;
                     thesignal.update();
+                    window.parent.postMessage({
+                        tag:'signalDragEnd',
+                        index: index,
+                        value: value
+                    });
                 }
             }
         }
@@ -81,4 +91,10 @@ window.onload = ()=> {
 
     let postsignalupdate = (index,value)=> {
     }
+
+    window.addEventListener('message', console.log);
+
+    setTimeout(()=> {
+        // window.parent.postMessage({message: 'The Signal'}, "*");
+    }, 3000);
 }

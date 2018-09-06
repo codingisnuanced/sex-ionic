@@ -335,7 +335,7 @@ page-home {
         .square-row .locator .square-content {
             // background-color: #ffffef;
             background-color: #eefefe;
-            color: #dedede;
+            color: rgba(210,210,210,1);
 
             button {
                 background-color: transparent;
@@ -358,10 +358,8 @@ page-home {
             background-color: rgba(0,0,0,0.1);
 
             .piece {
-                border-radius: 50%;
-                width: 70%;
-                height: 70%;
-                overflow: hidden;
+                width: 100%;
+                height: 100%;
 
                 .touch-area {
                     width: 100%;
@@ -373,7 +371,23 @@ page-home {
                 }
 
                 .touch-area.possible-move {
-                    background-color: rgba(245,245,229,1);
+                    border: 1px dashed Black;
+                    // background-color: rgba(245,245,229,1);
+                    border-radius: 50%;
+                    width: 70%;
+                    height: 70%;
+                    top: 15%;
+                    left: 15%;
+                }
+
+                .content-area {
+                    border-radius: 50%;
+                    width: 70%;
+                    height: 70%;
+                    margin-top: 15%;
+                    margin-left: 15%;
+                    overflow: hidden;
+                    // transform: rotate(0deg);
                 }
 
                 .coloring {
@@ -393,7 +407,7 @@ page-home {
                     border-radius: 50%;
                     width: 6px;
                     height: 6px;
-                    margin-top: 65%;
+                    margin-top: 70%;
                 }
             }
 
@@ -429,14 +443,18 @@ page-home {
                 }
             }
 
-            .piece[pieceSide] {
-                border-width: 1px;
-                border-style: dashed;
-                border-color: Black;
+            .piece[pieceSide] .content-area {
+                border: 1px dashed Black;
             }
 
             .piece.disturbed {
-                border-style: groove;
+                .content-area {
+                    border-style: groove;
+                    animation:spin 1s linear infinite;
+                    @keyframes spin {
+                        100% { transform:rotate(360deg); }
+                    }
+                }
             }
 
             .piece[pieceSide="black"] {

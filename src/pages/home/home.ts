@@ -14,9 +14,42 @@ export class HomePage {
     whiteSelection: BoardSquare; // BoardSquare
     blackLocked: BoardSquare; // BoardSquare
     whiteLocked: BoardSquare; // BoardSquare
+    targetSignal: number[];
 
     constructor(public menu: MenuController) {
         menu.enable(true);
+
+        window.addEventListener('message', console.log);
+
+        // let sig1 = [0.1,0.2,0.3,0.4,0.5,0.6],
+        // let sig1 = [1,2,1,2,1,2],
+            // sig2 = [0.24,0.942,0.85,0.324,0.63,0.1274];
+            // sig2 = [0.1,0.2,0.3,0.4,0.5,0.6];
+            // sig2 = [0.6,0.5,0.4,0.3,0.2,0.1];
+            // sig2 = [0,0,0,0,0,0];
+            // sig2 = [2,2,2,2,2,2];
+        let sig1 = [1,2,3,4,5,6,7,8,9,10,11,12],
+            sig2 = [12,11,10,9,8,7,6,5,4,3,2,1];
+            // sig2 = [0,0,0,0,0,0];
+        // let sig1 = [1,3,5,7,9,11],
+        //     sig2 = [11,9,7,5,3,1];
+        // let sig1 = [2,4,6,8,10,12],
+        //     sig2 = [12,10,8,6,4,2];
+        // let sig1 = [1,3,5,7,9,11],
+        //     sig2 = [2,4,6,8,10,12];
+        // let sig2 = [1,3,5,7,9,11],
+        //     sig1 = [2,4,6,8,10,12];
+        // let sig2 = [24,22,20,18,16,14,12,10,8,6,4,2],
+        //     sig1 = [2,4,6,8,10,12,14,16,18,20,22,24];
+        // let sig1 = [2,4,6,8,10,12],
+        //     sig2 = [3,6,9,12,15,18];
+        // let sig1 = [2,4,6,8,10,12],
+        //     sig2 = [1,2,4,7,11,16];
+        // let sig1 = [2,4,6,8,10,12],
+        //     sig2 = [1,2,4,7,11,169];
+        // let sig1 = [2,4,6,8,10,12],
+        //     sig2 = [41224,6124,232,53432,743,624];
+        console.log("correlation:", calculateCorrelation(sig1,sig2));
     }
 
     ngAfterViewInit() {
@@ -24,8 +57,12 @@ export class HomePage {
         window['particlesJS'].load('page-home-content', 'assets/config/particles.json', function() {
             console.log('callback - particles.js config loaded');
         });
-        let bsqs = gatherBoardSquares();
-        this.boardSquares = setupBoard(bsqs, this.isSimpleMode);
+
+        this.boardSquares = setupBoard(gatherBoardSquares(), this.isSimpleMode, true);
+
+        setTimeout(()=> {
+            document.querySelector('iframe').contentWindow.postMessage({message: 'Send forth The Signal'}, "*");
+        }, 2000);
     }
 
     // pieceTap(e) {
@@ -47,7 +84,7 @@ export class HomePage {
     //             this.blackLocked.nativeElement.querySelector('.piece').classList.remove('disturbed');
     //             this.blackLocked.nativeElement.querySelector('.piece').classList.remove('black-selection');
     //
-    //             renderSquarePair(bsq,this.blackLocked, this.isSimpleMode);
+    //             updateSquarePair(bsq,this.blackLocked, this.isSimpleMode);
     //
     //             // bsq.isBlackSelected = true;
     //             this.blackSelection = bsq;
@@ -91,14 +128,85 @@ export class HomePage {
     }
 
     piecePress(e) {
-        let p = e.target.parentNode;
+        let pelem = e.target.parentNode,
+            bsqelem = pelem.parentNode.parentNode,
+            l = parseInt(bsqelem.getAttribute(LETTER_INDEX_ATTRIB)),
+            pn = parseInt(bsqelem.getAttribute(POSITION_NUMBER_ATTRIB)),
+            bsq = this.boardSquares[coordsToBoardIndex(l,pn)];
         if (this.isBlackTurn) {
-            p.classList.add('white-selection');
+            if (this.whiteSelection != null) {
+                this.whiteSelection.nativeElement.querySelector('.piece').classList.remove('white-selection');
+                // this.whiteSelection.isWhiteSelected = false;
+            }
+            pelem.classList.add('white-selection');
+            this.whiteSelection = bsq;
         } else {
-            p.classList.add('black-selection');
+            if (this.blackSelection != null) {
+                this.blackSelection.nativeElement.querySelector('.piece').classList.remove('black-selection');
+                // this.blackSelection.isBlackSelected = false;
+            }
+            pelem.classList.add('black-selection');
+            this.blackSelection = bsq;
         }
-        document.querySelector('.error-log').textContent = p.outerHTML;
     }
+}
+
+let processSignalChange = (index: number, value: number, selection: BoardSquare, isStart: boolean, isEnd: boolean)=> {
+    // update piece signal
+    let signal = selection.piece.signal;
+    signal[index] = value;
+    // calculate correlation score
+
+    // update piece viewer and signal correlation score
+    // return updated board square (?)
+}
+
+let calculateCorrelation = (signal: number[], targetSignal: number[])=> {
+    let g = [], gavgs = [], sum = 0;
+    signal = normalize(signal);
+    targetSignal = normalize(targetSignal);
+    for (let i = 0; i < signal.length; i++) {
+        let g_ = [];
+        for (let j = 0; j < signal.length; j++) {
+            g_.push(0);
+        }
+        g.push(g_);
+        gavgs.push(0);
+    }
+
+    console.log(signal,targetSignal);
+
+    for (let i = 0; i < signal.length; i++) {
+        for (let j = i+1; j < signal.length; j++) {
+            // if (i===j) continue;
+            let diff = Math.abs((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]))/Math.abs(i-j);
+            // let diff = Math.abs((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]));
+
+            // let diff = ((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]))/Math.abs(i-j);
+            // let diff = (signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]);
+
+            // let diff = (Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]))/Math.abs(i-j);
+            // let diff = Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]);
+            console.log(signal[i],signal[j],targetSignal[i],targetSignal[j],Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]));
+            g[i][j] = g[j][i] = diff;
+        }
+        gavgs[i] = g[i].reduce((t,n)=> t+n)/(signal.length-1);
+        sum+=g[i].reduce((t,n)=> t+n);
+    }
+    console.log(g);
+    // let divdiff = gavgs.reduce((t,n)=>t+n)/signal.length,
+    let divdiff = sum/(signal.length*(signal.length-1)/2),
+    // let divdiff = sum/(signal.length*(signal.length)),
+        corr = 1-Math.abs(divdiff);
+    console.log('divdiff', divdiff);
+    console.log('corr', corr);
+    return Math.max(0,Math.min(1,corr));
+}
+
+let normalize = (arr: number[])=> {
+    let max = Math.max(...arr);
+    if (max === 0) return arr;
+    return arr.map(x=>x/max);
 }
 
 let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSquare, isSimpleMode: boolean, isBlackTurn: boolean)=> {
@@ -111,28 +219,43 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
         selclass = isBlackTurn ? 'black-selection' : 'white-selection';
 
     if (pc == null) { // move current locked
-        let spc = locked.piece;
-        voidMoves(getPossibleMoves(spc.positionLetterIndex, spc.positionNumber, bsqs));
-        bsq.piece = spc;
-        locked.piece = null;
-        // locked.isBlackSelected = false;
-        locked.isDisturbed = false;
-        locked.nativeElement.querySelector('.piece').classList.remove('disturbed');
-        locked.nativeElement.querySelector('.piece').classList.remove(selclass);
+        if (locked == null) {
+            // do toast: need to change the piece first
+        } else {
+            let spc = locked.piece;
+            // TODO: ensure that piece signal is different from changed signal (iframe messaging)
+            voidMoves(getPossibleMoves(spc.positionLetterIndex, spc.positionNumber, bsqs));
+            bsq.piece = spc;
+            locked.piece = null;
+            // locked.isBlackSelected = false;
+            locked.isDisturbed = false;
+            locked.nativeElement.querySelector('.piece').classList.remove('disturbed');
+            locked.nativeElement.querySelector('.piece').classList.remove(selclass);
 
-        renderSquarePair(bsq, locked, isSimpleMode);
+            updateSquarePair(bsq, locked, isSimpleMode);
 
-        // bsq.isBlackSelected = true;
-        selection = bsq;
-        pelem.classList.add(selclass);
-        locked = null;
-        isBlackTurn = !isBlackTurn;
+            // bsq.isBlackSelected = true;
+            selection = bsq;
+            pelem.classList.add(selclass);
+            locked = null;
+            isBlackTurn = !isBlackTurn;
+        }
     } else {
         if (selection != null) {
-            if (selection.piece.isBlack === isBlackTurn) {
+            let spc = selection.piece;
+
+            if (spc.isBlack === isBlackTurn) {
                 removeFocus(selection, selclass, bsqs);
             } else {
                 selection.nativeElement.querySelector('.piece').classList.remove(selclass);
+            }
+
+            if (spc.positionLetterIndex === l && spc.positionNumber === pn) {
+                return {
+                    selection: null,
+                    locked: locked,
+                    isBlackTurn: isBlackTurn
+                }
             }
         }
 
@@ -142,6 +265,9 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
         if (bsq.piece.isBlack == isBlackTurn && locked == null)
             enableMoves(getPossibleMoves(l,pn,bsqs));
     }
+
+    // TODO: update piece viewer OR activate color pickers
+    // send message to iframes
 
     return {
         selection: selection,
@@ -174,12 +300,22 @@ let removeFocus = (bsq: BoardSquare, selclass: string, bsqs: BoardSquare[])=> {
     voidMoves(getPossibleMoves(pc.positionLetterIndex, pc.positionNumber, bsqs));
 }
 
-let setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean)=> {
-    for (let i = 0; i < 6; i++) {
-        boardSquares[i].piece = new Piece(false, i%6, null, null);
-        boardSquares[i+12].piece = new Piece(false, 5-i%6, null, null);
-        boardSquares[i+18].piece = new Piece(true, i%6, null, null);
-        boardSquares[i+30].piece = new Piece(true, 5-i%6, null, null);
+// TODO: Before loading a saved game, use the coordinates of pieces to retrieve
+// BoardSquare DOMElements to construct BoardSquare object array for this function.
+let setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isNewGame: boolean)=> {
+
+    if (isNewGame) {
+        for (let i = 0; i < 6; i++) {
+            boardSquares[i].piece = new Piece(false, i%6, null, null);
+            boardSquares[i+12].piece = new Piece(false, 5-i%6, null, null);
+            boardSquares[i+18].piece = new Piece(true, i%6, null, null);
+            boardSquares[i+30].piece = new Piece(true, 5-i%6, null, null);
+        }
+    }
+
+    if (!isSimpleMode) {
+        document.querySelector('.black.piece.signal').setAttribute(ADJUSTABLE_ATTRIB, "true");
+        document.querySelector('.white.piece.signal').setAttribute(ADJUSTABLE_ATTRIB, "true");
     }
 
     for (let i = 0; i < boardSquares.length; i++) {
@@ -205,7 +341,7 @@ let setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean)=> {
     return boardSquares;
 }
 
-let renderSquarePair = (nbsq: BoardSquare, obsq: BoardSquare, isSimpleMode: boolean)=> {
+let updateSquarePair = (nbsq: BoardSquare, obsq: BoardSquare, isSimpleMode: boolean)=> {
     let p = obsq.piece,
         npc = nbsq.nativeElement.querySelector('.piece'),
         npcb = nbsq.nativeElement.querySelector('.touch-area'),
@@ -270,12 +406,16 @@ class Piece {
     colorIndex: number; // from `pieceColors`
     positionLetterIndex: number;
     positionNumber: number;
+    signal: number[];
 
     constructor(isBlack: boolean, colorIndex: number, positionLetterIndex: number, positionNumber: number) {
         this.isBlack = isBlack;
         this.colorIndex = colorIndex;
         this.positionLetterIndex = positionLetterIndex;
         this.positionNumber = positionNumber;
+        let signal = [];
+        for (let i = 0; i < 6; i++) { signal.push(0.0000001); }
+        this.signal = signal;
     }
 }
 
@@ -301,6 +441,7 @@ let LETTER_INDEX_ATTRIB = 'letterIndex',
     POSITION_NUMBER_ATTRIB = 'number',
     PIECE_SIDE_ATTRIB = 'pieceSide',
     PIECE_COLOR_ATTRIB = 'pieceColor',
-    DISABLED_ATTRIB = 'disabled';
+    DISABLED_ATTRIB = 'disabled',
+    ADJUSTABLE_ATTRIB = 'adjustable';
 let BLACK_PROP = 'black',
     WHITE_PROP = 'white';
