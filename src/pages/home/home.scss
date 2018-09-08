@@ -138,12 +138,26 @@ page-home {
         }
 
         iframe:focus {
-            outline: none!important;
+            outline: none !important;
         }
     }
 
     .piece.signal {
         visibility: hidden;
+    }
+
+    .signals-container.piece-active {
+        .target.signal, .score.signal {
+            visibility: hidden;
+        }
+
+        .piece.signal {
+            visibility: initial;
+        }
+
+        .changing {
+            background-color: rgba(0,0,0,0.15);
+        }
     }
 
     .white.signals-container {
@@ -159,7 +173,7 @@ page-home {
         display: none;
     }
 
-    .white.target.signal, .white.score.signal, .black.target.signal, .black.score.signal {
+    .white .target.signal, .white .score.signal, .black .target.signal, .black .score.signal {
         height: 50px;
         width: 170px;
         position: relative;
@@ -170,11 +184,11 @@ page-home {
         }
     }
 
-    .white.target.signal, .white.score.signal {
+    .white .target.signal, .white .score.signal {
         top: 20px;
     }
 
-    .white.piece.signal, .black.piece.signal {
+    .white .piece.signal, .black .piece.signal {
         height: 70px;
         width: 300px;
         position: absolute;
@@ -186,7 +200,7 @@ page-home {
         }
     }
 
-    .white.piece.signal {
+    .white .piece.signal {
         right: 0px;
     }
 
@@ -194,7 +208,7 @@ page-home {
         float: left;
     }
 
-    .black.piece.signal {
+    .black .piece.signal {
         left: 0px;
     }
 
@@ -489,7 +503,7 @@ page-home {
             .piece.black-selection[pieceSide="black"] {
                 .piece-color .piece-selection {
                     background-color: $blackPrimary;
-                    border: 0.2px groove gray;
+                    border: 0.5px groove gray;
                     float: left;
                 }
             }
@@ -497,7 +511,7 @@ page-home {
             .piece.white-selection[pieceSide="black"] {
                 .player-color .piece-selection {
                     background-color: $whitePrimary;
-                    border: 0.2px groove gray;
+                    border: 0.5px groove gray;
                     float: right;
                 }
             }
@@ -505,7 +519,7 @@ page-home {
             .piece.black-selection[pieceSide="white"] {
                 .player-color .piece-selection {
                     background-color: $blackPrimary;
-                    border: 0.2px groove gray;
+                    border: 0.5px groove gray;
                     float: right;
                 }
             }
@@ -513,7 +527,7 @@ page-home {
             .piece.white-selection[pieceSide="white"] {
                 .piece-color .piece-selection {
                     background-color: $whitePrimary;
-                    border: 0.2px groove gray;
+                    border: 0.5px solid gray;
                     float: left;
                 }
             }
@@ -530,18 +544,18 @@ page-home {
                     }
                     @keyframes flash {
                         0% {opacity: 0;}
-                        25% {opacity: 0.5}
+                        25% {opacity: 0.5;}
                         50% {opacity: 1;}
-                        100% {opacity: 0}
+                        100% {opacity: 0;}
                     }
                 }
             }
 
-            .piece.woke .content-area {
-                border-style: groove;
-            }
-
             .piece[pieceSide="black"] {
+                .content-area {
+                    border: 2px dashed $whitePrimary;
+                }
+
                 .player-color {
                     background-color: $blackPrimary;
                     border-right: 0.5px dashed $whitePrimary;
@@ -555,6 +569,10 @@ page-home {
             .piece[pieceSide="white"] {
                 transform: scale(-1, -1);
 
+                .content-area {
+                    border: 2px dashed $blackPrimary;
+                }
+
                 .player-color {
                     background-color: $whitePrimary;
                     border-right: 0.5px dashed $blackPrimary;
@@ -563,6 +581,10 @@ page-home {
                 .piece-color {
                     border-left: 0.5px dashed $blackPrimary;
                 }
+            }
+
+            .piece.woke .content-area {
+                border-style: solid;
             }
 
             .piece[pieceColor="black"] {

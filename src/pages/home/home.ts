@@ -8,7 +8,7 @@ import { MenuController } from 'ionic-angular';
 export class HomePage {
 
     boardSquares: BoardSquare[]; // [BoardSquare]
-    isSimpleMode: boolean = true;
+    isSimpleMode: boolean = false;
     isBlackTurn: boolean = true;
     blackSelection: BoardSquare; // BoardSquare
     whiteSelection: BoardSquare; // BoardSquare
@@ -24,32 +24,63 @@ export class HomePage {
         menu.enable(true);
 
         this.targetSignal = [Math.random(),Math.random(),Math.random(),Math.random(),Math.random(),Math.random()];
-
-        window.addEventListener('message', console.log);
     }
 
     ngAfterViewInit() {
         // TODO: particlesJS config should be loaded with consideration of screen size
-        window['particlesJS'].load('page-home-content', 'assets/config/particles.json', function() {
+        window['particlesJS'].load('page-home-content', 'assets/config/particles.json', ()=> {
             console.log('callback - particles.js config loaded');
         });
 
-        this.boardSquares = setupBoard(gatherBoardSquares(), this.isSimpleMode, this.isBlackTurn, true);
+        window.addEventListener('message', (e)=> {
+            if (e.data.frameReady) {
+                let sel = '.'+e.data.side+' .'+e.data.signalType+'.signal iframe',
+                    frame : HTMLFrameElement = document.querySelector(sel),
+                    sig_t = null,
+                    opts = null;
+                switch (e.data.signalType) {
+                    case 'target':
+                        sig_t = this.targetSignal.map(x=>''+Math.round(x*100)/100),
+                        opts = {
+                            labels: sig_t,
+                            data:  this.targetSignal,
+                            dragData: false
+                        }
+                        break;
+                    case 'score':
+                        let scsig = e.data.side === 'black' ? this.blackSignal : this.whiteSignal;
+                        sig_t = scsig.map(x=>''+Math.round(x*100)/100),
+                        opts = {
+                            labels: sig_t,
+                            data:  scsig,
+                            dragData: false
+                        }
+                        break;
+                    default:
+                        return;
+                }
 
-        setTimeout(()=> {
-            // document.querySelector('iframe').contentWindow.postMessage({message: 'Send forth The Signal'}, "*");
-        }, 2000);
+                frame.contentWindow.postMessage(opts, "*");
+
+                return;
+            }
+
+            let sel = this.isBlackTurn ? this.blackSelection : this.whiteSelection;
+            processSignalChange(e.data.index, e.data.value, sel, this.targetSignal, e.data.isStart, e.data.isEnd);
+        });
+
+        this.boardSquares = setupBoard(gatherBoardSquares(), this.isSimpleMode, this.isBlackTurn, this.targetSignal, true);
     }
 
     pieceTap(e) {
         let res;
         if(this.isBlackTurn) {
-            res = processPieceTap(e, this.boardSquares, this.blackSelection, this.blackLocked, this.isSimpleMode, this.isBlackTurn);
+            res = processPieceTap(e, this.boardSquares, this.blackSelection, this.blackLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal);
             this.blackSelection = res.selection;
             this.blackLocked = res.locked;
             this.isBlackTurn = res.isBlackTurn;
         } else {
-            res = processPieceTap(e, this.boardSquares, this.whiteSelection, this.whiteLocked, this.isSimpleMode, this.isBlackTurn);
+            res = processPieceTap(e, this.boardSquares, this.whiteSelection, this.whiteLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal);
             this.whiteSelection = res.selection;
             this.whiteLocked = res.locked;
             this.isBlackTurn = res.isBlackTurn;
@@ -86,6 +117,27 @@ export class HomePage {
                 }
             } else {
                 // TODO: show current selection's signal if there is one
+                let sel = this.isBlackTurn ? this.blackSelection : this.whiteSelection;
+                if (sel != null) {
+                    let side = this.isBlackTurn ? 'black' : 'white',
+                        sigc = document.querySelector('.'+side+'.signals-container'),
+                        psig = sigc.querySelector('.piece.signal'),
+                        sigframe = psig.querySelector('iframe'),
+                        sig = sel.piece.signal,
+                        sig_t = sig.map(x=>''+Math.round(x*100)/100),
+                        opts = {
+                            labels: sig_t,
+                            data:  sig,
+                            dragData: true
+                        }
+
+                    sigframe.contentWindow.postMessage(opts, "*");
+
+                    sigc.classList.add('piece-active');
+
+                    psig.querySelector('.name').textContent = ''+positionLetters[sel.piece.positionLetterIndex]+sel.piece.positionNumber;
+                    psig.querySelector('.correlation-score').textContent = ''+Math.round(calculateCorrelation(sig,this.targetSignal,true,true,false)*1e20)/1e18;
+                }
             }
         }
     }
@@ -126,6 +178,10 @@ export class HomePage {
             return;
         }
 
+        if (ci === this.prevColorIndex) {
+            // TODO: show toast saying color must change because piece was disturbed
+        }
+
         if (this.isBlackTurn) {
             this.blackLocked = locked = this.blackSelection;
         } else {
@@ -150,25 +206,34 @@ export class HomePage {
 // applies to only complex mode
 let processSignalChange = (index: number, value: number, selection: BoardSquare, targetSignal: number[], isStart: boolean, isEnd: boolean)=> {
     // update piece signal
-    let signal = selection.piece.signal;
+    let spc = selection.piece,
+        signal = spc.signal;
     signal[index] = value;
     // calculate correlation score
     let corr = calculateCorrelation(signal,targetSignal,true,true,false);
     // update piece viewer and signal correlation score
-    let side = selection.piece.isBlack ? 'black' : 'white';
-    let pvwr = document.querySelector('.'+side+'.piece-viewer'),
-        pclrasp = pvwr.querySelector('color-aspect'),
-        pcam = pvwr.querySelector('color-aspect-amount'),
-        letter = positionLetters[selection.piece.positionLetterIndex],
-        number = selection.piece.positionNumber,
-        sclr = pieceSimpleColors[selection.piece.colorIndex];
-    if (isStart) pvwr.classList.add('active');
+    let side = spc.isBlack ? 'black' : 'white',
+        psig = document.querySelector('.'+side+' .piece.signal'),
+        pvwr = document.querySelector('.'+side+'.piece-viewer'),
+        pclrasp = pvwr.querySelector('.color-aspect'),
+        pcam = pvwr.querySelector('.color-aspect-amount'),
+        letter = positionLetters[spc.positionLetterIndex],
+        number = spc.positionNumber,
+        sclr = pieceSimpleColors[index];
+    if (isStart) {
+        pvwr.classList.add('active');
+        psig.querySelector('div:first-child').classList.add('changing');
+    }
     pclrasp.setAttribute(ASPECT_COLOR_ATTRIB, sclr);
     pclrasp.querySelector('span').textContent = ''+letter+number;
-    pcam.querySelector('span').textContent = value.toFixed(18);
-    if (isEnd) pvwr.classList.remove('active');
-    // return updated board square (?)
-    return selection;
+    pcam.querySelector('span').textContent = ''+Math.round(value*1e18)/1e18;
+    psig.querySelector('.correlation-score').textContent = ''+Math.round(corr*1e20)/1e18;
+    // TODO: use selection.isBlackSelected && selection.isWhiteSelected to determine
+    // which iframes should be updated
+    if (isEnd) {
+        pvwr.classList.remove('active');
+        psig.querySelector('div:first-child').classList.remove('changing');
+    }
 }
 
 let calculateCorrelation = (sig: number[], tsig: number[], diversityIsRelative: boolean, useDistance: boolean, shouldNormalize: boolean)=> {
@@ -232,7 +297,7 @@ let normalize = (arr: number[])=> {
     return arr.map(x=>x/max);
 }
 
-let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSquare, isSimpleMode: boolean, isBlackTurn: boolean)=> {
+let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSquare, isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[])=> {
     let pelem = e.target.parentNode,
         bsqelem = pelem.parentNode.parentNode,
         l = parseInt(bsqelem.getAttribute(LETTER_INDEX_ATTRIB)),
@@ -283,8 +348,6 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
             isBlackTurn = !isBlackTurn;
             didMove = true;
 
-            console.log(bsqs[coordsToBoardIndex(l,pn)]);
-            console.log(bsq);
             alternatePieceState(bsqs,isBlackTurn);
         }
     } else {
@@ -327,6 +390,7 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
             enableMoves(getPossibleMoves(l,pn,bsqs));
 
         let spc = selection.piece;
+
         if (isSimpleMode) {
             if (spc.isBlack === isBlackTurn && (locked == null || (locked.piece.positionLetterIndex === l && locked.piece.positionNumber === pn))) {
                 let pckrs = document.getElementsByClassName(side+' color-picker');
@@ -341,7 +405,24 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
                 }
             }
         } else {
-            // TODO: send message to piece signal iframe; show/activate it
+            let side = isBlackTurn ? 'black' : 'white',
+                sigc = document.querySelector('.'+side+'.signals-container'),
+                psig = sigc.querySelector('.piece.signal'),
+                sigframe = psig.querySelector('iframe'),
+                sig = spc.signal,
+                sig_t = sig.map(x=>''+Math.round(x*100)/100),
+                opts = {
+                    labels: sig_t,
+                    data:  sig,
+                    dragData: spc.isBlack === isBlackTurn
+                }
+
+            sigframe.contentWindow.postMessage(opts, "*");
+
+            sigc.classList.add('piece-active');
+
+            psig.querySelector('.name').textContent = ''+positionLetters[spc.positionLetterIndex]+spc.positionNumber;
+            psig.querySelector('.correlation-score').textContent = ''+Math.round(calculateCorrelation(sig,targetSignal,true,true,false)*1e20)/1e18;
         }
     }
 
@@ -379,7 +460,7 @@ let removeFocus = (bsq: BoardSquare, selclass: string, bsqs: BoardSquare[])=> {
 
 // TODO: Before loading a saved game, use the coordinates of pieces to retrieve
 // BoardSquare DOMElements to construct BoardSquare object array for this function.
-let setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackTurn: boolean, isNewGame: boolean)=> {
+let setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[], isNewGame: boolean)=> {
 
     if (isNewGame) {
         for (let i = 0; i < 6; i++) {
@@ -396,10 +477,17 @@ let setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackTur
         }
     }
 
-    if (isSimpleMode === false) {
-        document.querySelector('.black.piece.signal').setAttribute(ADJUSTABLE_ATTRIB, "true");
-        document.querySelector('.white.piece.signal').setAttribute(ADJUSTABLE_ATTRIB, "true");
-    }
+    Array.prototype.forEach.call(document.getElementsByClassName('target signal'), (tsig)=> {
+        let sigframe = tsig.querySelector('iframe'),
+            sig_t = targetSignal.map(x=>''+Math.round(x*100)/100),
+            opts = {
+                labels: sig_t,
+                data:  targetSignal,
+                dragData: false
+            }
+
+        sigframe.contentWindow.postMessage(opts, "*");
+    });
 
     for (let i = 0; i < boardSquares.length; i++) {
         let bsq = boardSquares[i],
