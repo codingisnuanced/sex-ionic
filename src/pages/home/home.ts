@@ -20,36 +20,6 @@ export class HomePage {
         menu.enable(true);
 
         window.addEventListener('message', console.log);
-
-        let sig1 = [0.1,0.2,0.3,0.4,0.5,0.6],
-        // let sig1 = [1,2,1,2,1,2],
-            // sig2 = [0.24,0.942,0.85,0.324,0.63,0.1274];
-            // sig2 = [0.1,0.2,0.3,0.4,0.5,0.6];
-            sig2 = [0.6,0.5,0.4,0.3,0.2,0.1];
-            // sig2 = [0,0,0,0,0,0];
-            // sig2 = [2,2,2,2,2,2];
-        // let sig1 = [1,2,3,4,5,6,7,8,9,10,11,12],
-        //     sig2 = [12,11,10,9,8,7,6,5,4,3,2,1];
-            // sig2 = [0,0,0,0,0,0];
-        // let sig1 = [1,3,5,7,9,11],
-        //     sig2 = [11,9,7,5,3,1];
-        // let sig1 = [2,4,6,8,10,12],
-        //     sig2 = [12,10,8,6,4,2];
-        // let sig1 = [1,3,5,7,9,11],
-        //     sig2 = [2,4,6,8,10,12];
-        // let sig2 = [1,3,5,7,9,11],
-        //     sig1 = [2,4,6,8,10,12];
-        // let sig2 = [24,22,20,18,16,14,12,10,8,6,4,2],
-        //     sig1 = [2,4,6,8,10,12,14,16,18,20,22,24];
-        // let sig1 = [2,4,6,8,10,12],
-        //     sig2 = [3,6,9,12,15,18];
-        // let sig1 = [2,4,6,8,10,12],
-        //     sig2 = [1,2,4,7,11,16];
-        // let sig1 = [2,4,6,8,10,12],
-        //     sig2 = [1,2,4,7,11,169];
-        // let sig1 = [2,4,6,8,10,12],
-        //     sig2 = [41224,6124,232,53432,743,624];
-        console.log("correlation:", calculateCorrelation(sig1,sig2,false,true));
     }
 
     ngAfterViewInit() {
@@ -63,24 +33,6 @@ export class HomePage {
         setTimeout(()=> {
             // document.querySelector('iframe').contentWindow.postMessage({message: 'Send forth The Signal'}, "*");
         }, 2000);
-
-        let sig1 = [0.1,0.2,0.3,0.4,0.5,0.6];
-        let errorlog = document.querySelector('.error-log');
-        let html = '';
-        let i = 0;
-        let corrs = perms(sig1).map((perm)=> {
-            html+=i+'&emsp;';
-            html+=calculateCorrelation(sig1,perm,false,true) + '<br>';
-            // html+=calculateCorrelation(sig1,perm,false,true) + '&emsp;';
-            // html+=calculateCorrelation(sig1,perm,true,true) + '<br>';
-            // if(i === 0 || i === 120 || i === 240 || i === 360 || i === 480 || i === 600) {
-            //     console.log(i,perm);
-            // }
-            // html+=calculateCorrelation(sig1,[Math.random(),Math.random(),Math.random(),Math.random(),Math.random(),Math.random()],false,true)+'<br>';
-            i++;
-        });
-        errorlog.innerHTML=html;
-        console.log(html);
     }
 
     // pieceTap(e) {
@@ -167,22 +119,69 @@ export class HomePage {
             this.blackSelection = bsq;
         }
     }
+
+    colorPickerTap(e) {
+        let locked: BoardSquare,
+            side = this.isBlackTurn ? 'black' : 'white',
+            oselc = document.querySelector('.'+side+'.color-picker button.selected'),
+            oci = pieceSimpleColors.indexOf(oselc.parentElement.parentElement.getAttribute(PIECE_COLOR_ATTRIB)),
+            c = e.target.parentNode.parentNode.getAttribute(PIECE_COLOR_ATTRIB),
+            ci = pieceSimpleColors.indexOf(c);
+
+        if (oci === ci) {
+            // TODO: show toast saying color must be different
+            return;
+        }
+
+        if (this.isBlackTurn) {
+            this.blackLocked = locked = this.blackSelection;
+        } else {
+            this.whiteLocked = locked = this.whiteSelection;
+        }
+
+        locked.isDisturbed = true;
+        locked.nativeElement.querySelector('.piece').classList.add('disturbed');
+
+        // remove focus from current color picker
+        oselc.classList.remove('selected');
+
+        // select new color picker
+        e.target.classList.add('selected');
+        locked.piece.colorIndex = ci;
+        locked.nativeElement.querySelector('.piece').setAttribute(PIECE_COLOR_ATTRIB, c);
+    }
 }
 
-let processSignalChange = (index: number, value: number, selection: BoardSquare, isStart: boolean, isEnd: boolean)=> {
+// applies to only complex mode
+let processSignalChange = (index: number, value: number, selection: BoardSquare, targetSignal: number[], isStart: boolean, isEnd: boolean)=> {
     // update piece signal
     let signal = selection.piece.signal;
     signal[index] = value;
     // calculate correlation score
-
+    let corr = calculateCorrelation(signal,targetSignal,true,true,false);
     // update piece viewer and signal correlation score
+    let side = selection.piece.isBlack ? 'black' : 'white';
+    let pvwr = document.querySelector('.'+side+'.piece-viewer'),
+        pclrasp = pvwr.querySelector('color-aspect'),
+        pcam = pvwr.querySelector('color-aspect-amount'),
+        letter = positionLetters[selection.piece.positionLetterIndex],
+        number = selection.piece.positionNumber,
+        sclr = pieceSimpleColors[selection.piece.colorIndex];
+    if (isStart) pvwr.classList.add('active');
+    pclrasp.setAttribute(ASPECT_COLOR_ATTRIB, sclr);
+    pclrasp.querySelector('span').textContent = ''+letter+number;
+    pcam.querySelector('span').textContent = value.toFixed(18);
+    if (isEnd) pvwr.classList.remove('active');
     // return updated board square (?)
+    return selection;
 }
 
-let calculateCorrelation = (signal: number[], targetSignal: number[], diversityIsRelative: boolean, useDistance: boolean)=> {
-    let g = [], gavgs = [], sum = 0;
-    signal = normalize(signal);
-    targetSignal = normalize(targetSignal);
+let calculateCorrelation = (sig: number[], tsig: number[], diversityIsRelative: boolean, useDistance: boolean, shouldNormalize: boolean)=> {
+    let g = [], gavgs = [], sum = 0,
+        signal = sig.slice(0,sig.length),
+        targetSignal = tsig.slice(0,tsig.length);
+    if (shouldNormalize) {signal=normalize(signal); targetSignal=normalize(targetSignal);}
+
     for (let i = 0; i < signal.length; i++) {
         let g_ = [];
         for (let j = 0; j < signal.length; j++) {
@@ -192,8 +191,6 @@ let calculateCorrelation = (signal: number[], targetSignal: number[], diversityI
         gavgs.push(0);
     }
 
-    // console.log(signal,targetSignal);
-
     for (let i = 0; i < signal.length; i++) {
         for (let j = i+1; j < signal.length; j++) {
             let diff = 0;
@@ -202,20 +199,11 @@ let calculateCorrelation = (signal: number[], targetSignal: number[], diversityI
             } else {
                 diff = Math.abs((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]));
             }
-
-            // let diff = ((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]))/Math.abs(i-j);
-            // let diff = (signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]);
-
-            // let diff = (Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]))/Math.abs(i-j);
-            // let diff = Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]);
-            // console.log(signal[i],signal[j],targetSignal[i],targetSignal[j],Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]));
-            // console.log(Math.abs(signal[i]-signal[j])-Math.abs(targetSignal[i]-targetSignal[j]));
             g[i][j] = g[j][i] = diff;
         }
         gavgs[i] = g[i].reduce((t,n)=> t+n)/(signal.length-1);
         sum+=g[i].reduce((t,n)=> t+n);
     }
-    // console.log(g);
     let progDivDiff = 0;
     if (diversityIsRelative) {
         progDivDiff = sum/(signal.length*(signal.length-1)/2);
@@ -223,15 +211,11 @@ let calculateCorrelation = (signal: number[], targetSignal: number[], diversityI
         progDivDiff = gavgs.reduce((t,n)=>t+n)/signal.length;
     }
     let corr = 1-Math.abs(progDivDiff);
-    // console.log('progDivDiff', progDivDiff);
-    // console.log('corr', corr);
     return Math.max(0,Math.min(1,corr));
 }
 
 let perms = (signal: number[])=> {
     let ps = [];
-
-    // console.log(signal);
 
     for (let i = 0; i < signal.length; i++) {
         let signal_ = signal.slice(0,signal.length);
@@ -243,8 +227,6 @@ let perms = (signal: number[])=> {
             ps.push(subp);
         });
     }
-
-    // console.log('ps',ps);
 
     return ps;
 }
@@ -262,11 +244,12 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
         pn = parseInt(bsqelem.getAttribute(POSITION_NUMBER_ATTRIB)),
         bsq = bsqs[coordsToBoardIndex(l,pn)],
         pc = bsq.piece,
-        selclass = isBlackTurn ? 'black-selection' : 'white-selection';
+        selclass = isBlackTurn ? 'black-selection' : 'white-selection',
+        side = isBlackTurn ? 'black' : 'white';
 
     if (pc == null) { // move current locked
         if (locked == null) {
-            // do toast: need to change the piece first
+            // TODO: do toast: need to change the piece first
         } else {
             let spc = locked.piece;
             // TODO: ensure that piece signal is different from changed signal (iframe messaging)
@@ -280,6 +263,21 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
 
             updateSquarePair(bsq, locked, isSimpleMode);
 
+            if (isSimpleMode) {
+                let oselc = document.querySelector('.'+side+'.color-picker button.selected');
+                if (oselc != null) oselc.classList.remove('selected');
+
+                let pckrs = document.getElementsByClassName(side+' color-picker');
+                Array.prototype.forEach.call(pckrs, pckr=>{
+                    pckr.classList.remove('color-picker-active');
+                    pckr.querySelector('button').setAttribute(DISABLED_ATTRIB, 'true');
+                });
+
+                // TODO: activate the other side's pickers if piece is selected
+            } else {
+                // TODO: activate the other side's piece signal if piece is selected
+            }
+
             // bsq.isBlackSelected = true;
             selection = bsq;
             pelem.classList.add(selclass);
@@ -290,12 +288,26 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
         if (selection != null) {
             let spc = selection.piece;
 
-            if (spc.isBlack === isBlackTurn) {
+            if (spc.isBlack === isBlackTurn) { // due side tapped own piece
                 removeFocus(selection, selclass, bsqs);
-            } else {
+
+            } else { // due side tapped opponent piece
                 selection.nativeElement.querySelector('.piece').classList.remove(selclass);
             }
 
+            if (isSimpleMode) {
+                let pckrs = document.getElementsByClassName(side+' color-picker');
+                Array.prototype.forEach.call(pckrs, pckr=>{
+                    pckr.classList.remove('color-picker-active');
+                    pckr.querySelector('button').setAttribute(DISABLED_ATTRIB, 'true');
+                });
+                let oselc = document.querySelector('.'+side+'.color-picker button.selected');
+                if (oselc != null) oselc.classList.remove('selected');
+            } else {
+                // TODO: hide/turn off piece signal
+            }
+
+            // current selection is the same as what was tapped; remove focus
             if (spc.positionLetterIndex === l && spc.positionNumber === pn) {
                 return {
                     selection: null,
@@ -308,12 +320,29 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
         // bsq.isBlackSelected = true;
         selection = bsq;
         pelem.classList.add(selclass);
-        if (bsq.piece.isBlack == isBlackTurn && locked == null)
+        if (bsq.piece.isBlack == isBlackTurn && (locked == null || (locked.piece.positionLetterIndex === l && locked.piece.positionNumber === pn)))
             enableMoves(getPossibleMoves(l,pn,bsqs));
-    }
 
-    // TODO: update piece viewer OR activate color pickers
-    // send message to iframes
+        let spc = selection.piece;
+        if (isSimpleMode) {
+            if (spc.isBlack === isBlackTurn && (locked == null || (locked.piece.positionLetterIndex === l && locked.piece.positionNumber === pn))) {
+                let pckrs = document.getElementsByClassName(side+' color-picker');
+                Array.prototype.forEach.call(pckrs, pckr=> {
+                    pckr.classList.add('color-picker-active');
+                    pckr.querySelector('button').removeAttribute(DISABLED_ATTRIB);
+                });
+                if (spc.isBlack) {
+                    pckrs[spc.colorIndex].querySelector('button').classList.add('selected');
+                    // pckrs[spc.colorIndex].setAttribute(DISABLED_ATTRIB, 'true');
+                } else {
+                    pckrs[5-spc.colorIndex].querySelector('button').classList.add('selected');
+                    // pckrs[5-spc.colorIndex].setAttribute(DISABLED_ATTRIB, 'true');
+            }
+        }
+        } else {
+            // TODO: send message to piece signal iframe; show/activate it
+        }
+    }
 
     return {
         selection: selection,
@@ -371,7 +400,7 @@ let setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isNewGame:
             pcb = bsq.nativeElement.querySelector('.touch-area');
         if (p) {
             let side = p.isBlack ? BLACK_PROP : WHITE_PROP,
-                color = isSimpleMode ? pieceColors[p.colorIndex] : side;
+                color = isSimpleMode ? pieceSimpleColors[p.colorIndex] : side;
             pc.setAttribute(PIECE_SIDE_ATTRIB, side);
             pc.setAttribute(PIECE_COLOR_ATTRIB, color);
             pcb.removeAttribute(DISABLED_ATTRIB);
@@ -388,14 +417,14 @@ let setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isNewGame:
 }
 
 let updateSquarePair = (nbsq: BoardSquare, obsq: BoardSquare, isSimpleMode: boolean)=> {
-    let p = obsq.piece,
+    let p = nbsq.piece,
         npc = nbsq.nativeElement.querySelector('.piece'),
         npcb = nbsq.nativeElement.querySelector('.touch-area'),
         opc = obsq.nativeElement.querySelector('.piece'),
         opcb = obsq.nativeElement.querySelector('.touch-area');
 
     let side = p.isBlack ? BLACK_PROP : WHITE_PROP,
-        color = isSimpleMode ? pieceColors[p.colorIndex] : side;
+        color = isSimpleMode ? pieceSimpleColors[p.colorIndex] : side;
     npc.setAttribute(PIECE_SIDE_ATTRIB, side);
     npc.setAttribute(PIECE_COLOR_ATTRIB, color);
     npcb.removeAttribute(DISABLED_ATTRIB);
@@ -449,7 +478,7 @@ let gatherBoardSquares = ()=> {
 
 class Piece {
     isBlack: boolean;
-    colorIndex: number; // from `pieceColors`
+    colorIndex: number; // from `pieceSimpleColors`
     positionLetterIndex: number;
     positionNumber: number;
     signal: number[];
@@ -465,7 +494,9 @@ class Piece {
     }
 }
 
-let pieceColors = ["red","green","orange","blue","yellow","purple"];
+let pieceSimpleColors = ["red","green","orange","blue","yellow","purple"],
+    // pieceColors = ['Red','MediumSpringGreen','Orange','DodgerBlue','Yellow','Fuchsia'],
+    positionLetters = ['A','B','C','D','E','F'];
 
 class BoardSquare {
     piece: Piece;
@@ -487,6 +518,7 @@ let LETTER_INDEX_ATTRIB = 'letterIndex',
     POSITION_NUMBER_ATTRIB = 'number',
     PIECE_SIDE_ATTRIB = 'pieceSide',
     PIECE_COLOR_ATTRIB = 'pieceColor',
+    ASPECT_COLOR_ATTRIB = 'aspectColor',
     DISABLED_ATTRIB = 'disabled',
     ADJUSTABLE_ATTRIB = 'adjustable';
 let BLACK_PROP = 'black',

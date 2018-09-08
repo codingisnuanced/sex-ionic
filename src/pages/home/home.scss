@@ -10,7 +10,7 @@ $sexPurple: Fuchsia;
 page-home {
 
     * {
-      box-sizing: border-box;
+        box-sizing: border-box;
     }
 
     ion-content {
@@ -210,6 +210,7 @@ page-home {
             width: calc((100%/8)*6);
             height: 100%;
             z-index: 1;
+            font-weight: bold;
             display: none;
 
             div {
@@ -223,12 +224,36 @@ page-home {
                 }
             }
 
-            .piece-color {
+            .color-aspect {
                 width: calc(250px/8);
                 height: 100%;
             }
 
-            .piece-color-amount {
+            .color-aspect[aspectColor="red"] {
+                background-color: $sexRed;
+            }
+
+            .color-aspect[aspectColor="green"] {
+                background-color: $sexGreen;
+            }
+
+            .color-aspect[aspectColor="orange"] {
+                background-color: $sexOrange;
+            }
+
+            .color-aspect[aspectColor="blue"] {
+                background-color: $sexBlue;
+            }
+
+            .color-aspect[aspectColor="yellow"] {
+                background-color: $sexYellow;
+            }
+
+            .color-aspect[aspectColor="purple"] {
+                background-color: $sexPurple;
+            }
+
+            .color-aspect-amount {
                 font-size: 10px;
                 height: 100%;
                 width: calc((250px/8)*5);
@@ -237,29 +262,37 @@ page-home {
         }
 
         .piece-viewer.black {
-            .piece-color {
-                color: black;
-                background-color: Tomato;
+            .color-aspect {
+                color: $blackPrimary;
             }
 
-            .piece-color-amount {
-                background-color: black;
-                color: white;
+            .color-aspect-amount {
+                $borderColor: rgba(0,0,0,0.3);
+                border-top: 1px dotted $borderColor;
+                border-right: 1px dotted $borderColor;
+                background-color: $blackPrimary;
+                color: $whitePrimary;
             }
         }
 
         .piece-viewer.white {
             transform: scale(-1, -1);
 
-            .piece-color {
-                color: white;
-                background-color: DodgerBlue;
+            .color-aspect {
+                color: $whitePrimary;
             }
 
-            .piece-color-amount {
-                background-color: white;
-                color: black;
+            .color-aspect-amount {
+                $borderColor: rgba(0,0,0,0.3);
+                border-top: 1px dotted $borderColor;
+                border-right: 1px dotted $borderColor;
+                background-color: $whitePrimary;
+                color: $blackPrimary;
             }
+        }
+
+        .piece-viewer.active {
+            display: initial;
         }
 
         .square-row .square {
@@ -336,22 +369,58 @@ page-home {
             // background-color: #ffffef;
             background-color: #eefefe;
             color: rgba(210,210,210,1);
+            font-size: 1em;
 
             button {
                 background-color: transparent;
                 color: inherit;
+                font-size: 1em;
             }
         }
 
-        .A.color-picker.square .square-content {
+        .color-picker-active.square .square-content {
             background-color: transparent;
 
             button {
                 width: 80%;
                 height: 80%;
-                background-color: $sexRed;
                 border-radius: 50%;
+                // border: 1px dotted rgba(0,0,0,0.3);
+                border: none;
+
+                // hide text
+                text-indent: 100%;
+                white-space: nowrap;
+                overflow: hidden;
             }
+
+            button.selected {
+                border: 1px groove $blackPrimary;
+            }
+        }
+
+        .color-picker-active.square[pieceColor="red"] .square-content button {
+            background-color: $sexRed;
+        }
+
+        .color-picker-active.square[pieceColor="green"] .square-content button {
+            background-color: $sexGreen;
+        }
+
+        .color-picker-active.square[pieceColor="orange"] .square-content button {
+            background-color: $sexOrange;
+        }
+
+        .color-picker-active.square[pieceColor="blue"] .square-content button {
+            background-color: $sexBlue;
+        }
+
+        .color-picker-active.square[pieceColor="yellow"] .square-content button {
+            background-color: $sexYellow;
+        }
+
+        .color-picker-active.square[pieceColor="purple"] .square-content button {
+            background-color: $sexPurple;
         }
 
         .playable.square .square-content {
@@ -450,9 +519,15 @@ page-home {
             .piece.disturbed {
                 .content-area {
                     border-style: groove;
-                    animation:spin 1s linear infinite;
+                    animation:flash 1s linear infinite;
                     @keyframes spin {
                         100% { transform:rotate(360deg); }
+                    }
+                    @keyframes flash {
+                        0% {opacity: 0;}
+                        25% {opacity: 0.5}
+                        50% {opacity: 1;}
+                        100% {opacity: 0}
                     }
                 }
             }

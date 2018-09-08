@@ -54,20 +54,20 @@
     <div class="board-container">
         <div class="square-row">
             <div class="piece-viewer black">
-                <div class="piece-color">
+                <div class="color-aspect">
                     <span>E4</span>
                 </div>
-                <div class="piece-color-amount">
+                <div class="color-aspect-amount">
                     <span>0.968653520968653520</span> <!-- 9 decimal places; 18 max -->
                 </div>
             </div>
             <div class="square blank-square"><div class="square-content"></div></div>
-            <div class="square locator A color-picker"><div class="square-content"><button disabled>A</button></div></div>
-            <div class="square locator B color-picker"><div class="square-content"><button disabled>B</button></div></div>
-            <div class="square locator C color-picker"><div class="square-content"><button disabled>C</button></div></div>
-            <div class="square locator D color-picker"><div class="square-content"><button disabled>D</button></div></div>
-            <div class="square locator E color-picker"><div class="square-content"><button disabled>E</button></div></div>
-            <div class="square locator F color-picker"><div class="square-content"><button disabled>F</button></div></div>
+            <div class="square locator A color-picker black" pieceColor="red"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">A</button></div></div>
+            <div class="square locator B color-picker black" pieceColor="green"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">B</button></div></div>
+            <div class="square locator C color-picker black" pieceColor="orange"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">C</button></div></div>
+            <div class="square locator D color-picker black" pieceColor="blue"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">D</button></div></div>
+            <div class="square locator E color-picker black" pieceColor="yellow"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">E</button></div></div>
+            <div class="square locator F color-picker black" pieceColor="purple"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">F</button></div></div>
             <div class="square blank-square"><div class="square-content"></div></div>
         </div>
 
@@ -579,12 +579,12 @@
                 </div>
             </div>
             <div class="square blank-square"><div class="square-content"></div></div>
-            <div class="square locator A color-picker white"><div class="square-content"><button disabled>A</button></div></div>
-            <div class="square locator B color-picker white"><div class="square-content"><button disabled>B</button></div></div>
-            <div class="square locator C color-picker white"><div class="square-content"><button disabled>C</button></div></div>
-            <div class="square locator D color-picker white"><div class="square-content"><button disabled>D</button></div></div>
-            <div class="square locator E color-picker white"><div class="square-content"><button disabled>E</button></div></div>
-            <div class="square locator F color-picker white"><div class="square-content"><button disabled>F</button></div></div>
+            <div class="square locator A color-picker white" pieceColor="purple"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">A</button></div></div>
+            <div class="square locator B color-picker white" pieceColor="yellow"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">B</button></div></div>
+            <div class="square locator C color-picker white" pieceColor="blue"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">C</button></div></div>
+            <div class="square locator D color-picker white" pieceColor="orange"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">D</button></div></div>
+            <div class="square locator E color-picker white" pieceColor="green"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">E</button></div></div>
+            <div class="square locator F color-picker white" pieceColor="red"><div class="square-content"><button disabled (tap)="colorPickerTap($event)">F</button></div></div>
             <div class="square blank-square"><div class="square-content"></div></div>
         </div>
     </div>
