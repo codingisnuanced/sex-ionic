@@ -87,10 +87,16 @@ page-home {
                 .white {
                     transform: scale(-1, -1);
                     text-align: left;
+                    padding-top: 3px;
                 }
 
                 .black {
-                    border-top: 0.2px solid black;
+                    border-top: 0.1px dotted black;
+                    padding-top: 3px;
+                }
+
+                .current-turn {
+                    font-weight: bold;
                 }
             }
 
@@ -518,7 +524,6 @@ page-home {
 
             .piece.disturbed {
                 .content-area {
-                    border-style: groove;
                     animation:flash 1s linear infinite;
                     @keyframes spin {
                         100% { transform:rotate(360deg); }
@@ -530,6 +535,10 @@ page-home {
                         100% {opacity: 0}
                     }
                 }
+            }
+
+            .piece.woke .content-area {
+                border-style: groove;
             }
 
             .piece[pieceSide="black"] {
