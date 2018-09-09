@@ -28,7 +28,7 @@ window.onload = ()=> {
             },
             options: {
                 animation: {
-                    duration: 400
+                    duration: 0
                 },
                 events: events,
                 responsive: false,

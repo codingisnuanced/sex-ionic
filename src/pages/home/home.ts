@@ -40,7 +40,7 @@ export class HomePage {
                     opts = null;
                 switch (e.data.signalType) {
                     case 'target':
-                        sig_t = this.targetSignal.map(x=>''+Math.round(x*100)/100),
+                        sig_t = this.targetSignal.map(x=>''+(Math.round(x*100)/100)),
                         opts = {
                             labels: sig_t,
                             data:  this.targetSignal,
@@ -49,7 +49,7 @@ export class HomePage {
                         break;
                     case 'score':
                         let scsig = e.data.side === 'black' ? this.blackSignal : this.whiteSignal;
-                        sig_t = scsig.map(x=>''+Math.round(x*100)/100),
+                        sig_t = scsig.map(x=>''+(Math.round(x*100)/100)),
                         opts = {
                             labels: sig_t,
                             data:  scsig,
@@ -65,22 +65,35 @@ export class HomePage {
                 return;
             }
 
-            let sel = this.isBlackTurn ? this.blackSelection : this.whiteSelection;
-            processSignalChange(e.data.index, e.data.value, sel, this.targetSignal, e.data.isStart, e.data.isEnd);
+            let locked = null;
+            if (this.isBlackTurn) {
+                locked = this.blackLocked = this.blackSelection;
+            } else {
+                locked = this.whiteLocked = this.whiteSelection;
+            }
+            locked.isDisturbed = true;
+            locked.nativeElement.querySelector('.piece').classList.add('disturbed');
+            let isBothSelection = false;
+            if (this.blackSelection != null && this.whiteSelection != null) {
+                let bp = this.blackSelection.piece,
+                    wp = this.whiteSelection.piece;
+                isBothSelection = bp.positionLetterIndex === wp.positionLetterIndex && bp.positionNumber === wp.positionNumber;
+            }
+            signalChange_(e.data.index, e.data.value, locked, this.targetSignal, e.data.isStart, e.data.isEnd, isBothSelection);
         });
 
         this.boardSquares = setupBoard(gatherBoardSquares(), this.isSimpleMode, this.isBlackTurn, this.targetSignal, true);
     }
 
     pieceTap(e) {
-        let res;
+        let res = null;
         if(this.isBlackTurn) {
-            res = processPieceTap(e, this.boardSquares, this.blackSelection, this.blackLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal);
+            res = pieceTap_(e, this.boardSquares, this.blackSelection, this.blackLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal);
             this.blackSelection = res.selection;
             this.blackLocked = res.locked;
             this.isBlackTurn = res.isBlackTurn;
         } else {
-            res = processPieceTap(e, this.boardSquares, this.whiteSelection, this.whiteLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal);
+            res = pieceTap_(e, this.boardSquares, this.whiteSelection, this.whiteLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal);
             this.whiteSelection = res.selection;
             this.whiteLocked = res.locked;
             this.isBlackTurn = res.isBlackTurn;
@@ -89,55 +102,70 @@ export class HomePage {
         if (res.didMove) {
             this.prevColorIndex = this.prevSignal = null;
 
+            let t = null;
             if (this.isBlackTurn) {
-                document.querySelector('.turns-taken .black').classList.add('current-turn');
+                t = document.querySelector('.turns-taken .black');
+                t.classList.add('current-turn');
                 document.querySelector('.turns-taken .white').classList.remove('current-turn');
-            } else {
-                document.querySelector('.turns-taken .white').classList.add('current-turn');
-                document.querySelector('.turns-taken .black').classList.remove('current-turn');
-            }
 
-            if (this.isSimpleMode) {
-                if (this.isBlackTurn && this.blackSelection != null) {
-                    let pckrs = document.getElementsByClassName('black color-picker');
-                    Array.prototype.forEach.call(pckrs, pckr=> {
-                        pckr.classList.add('color-picker-active');
-                        pckr.querySelector('button').removeAttribute(DISABLED_ATTRIB);
-                    });
-                    pckrs[this.blackSelection.piece.colorIndex].querySelector('button').classList.add('selected');
-                    enableMoves(getPossibleMoves(this.blackSelection.piece.positionLetterIndex,this.blackSelection.piece.positionNumber,this.boardSquares));
-                } else if (this.isBlackTurn === false && this.whiteSelection != null) {
-                    let pckrs = document.getElementsByClassName('white color-picker');
-                    Array.prototype.forEach.call(pckrs, pckr=> {
-                        pckr.classList.add('color-picker-active');
-                        pckr.querySelector('button').removeAttribute(DISABLED_ATTRIB);
-                    });
-                    pckrs[5-this.whiteSelection.piece.colorIndex].querySelector('button').classList.add('selected');
-                    enableMoves(getPossibleMoves(this.whiteSelection.piece.positionLetterIndex,this.whiteSelection.piece.positionNumber,this.boardSquares));
+                if(this.blackSelection != null && this.blackSelection.piece == null) {
+                    // selection is white piece recently moved
+                    this.blackSelection.nativeElement.querySelector('.piece').classList.remove('black-selection');
+                    this.blackSelection = res.selection;
+                    this.blackSelection.nativeElement.querySelector('.piece').classList.add('black-selection');
                 }
             } else {
-                // TODO: show current selection's signal if there is one
-                let sel = this.isBlackTurn ? this.blackSelection : this.whiteSelection;
-                if (sel != null) {
-                    let side = this.isBlackTurn ? 'black' : 'white',
-                        sigc = document.querySelector('.'+side+'.signals-container'),
+                t = document.querySelector('.turns-taken .white');
+                t.classList.add('current-turn');
+                document.querySelector('.turns-taken .black').classList.remove('current-turn');
+
+                if(this.whiteSelection != null && this.whiteSelection.piece == null) {
+                    // selection is black piece recently moved
+                    this.whiteSelection.nativeElement.querySelector('.piece').classList.remove('white-selection');
+                    this.whiteSelection = res.selection;
+                    this.whiteSelection.nativeElement.querySelector('.piece').classList.add('white-selection');
+                }
+            }
+
+            let tsp = t.querySelector('span');
+            tsp.textContent = ''+(parseInt(tsp.textContent)+1);
+
+            let sel = this.isBlackTurn ? this.blackSelection : this.whiteSelection;
+
+            if (sel != null) {
+                let side = this.isBlackTurn ? 'black' : 'white',
+                    spc = sel.piece;
+
+                if (this.isSimpleMode) {
+                    let pckrs = document.getElementsByClassName(side+' color-picker');
+                    Array.prototype.forEach.call(pckrs, pckr=> {
+                        pckr.classList.add('color-picker-active');
+                        pckr.querySelector('button').removeAttribute(DISABLED_ATTRIB);
+                    });
+                    pckrs[spc.colorIndex].querySelector('button').classList.add('selected');
+                } else {
+                    let sigc = document.querySelector('.'+side+'.signals-container'),
                         psig = sigc.querySelector('.piece.signal'),
                         sigframe = psig.querySelector('iframe'),
-                        sig = sel.piece.signal,
-                        sig_t = sig.map(x=>''+Math.round(x*100)/100),
+                        sig = spc.signal,
+                        sig_t = sig.map(x=>''+(Math.round(x*100)/100)),
                         opts = {
                             labels: sig_t,
                             data:  sig,
-                            dragData: true
+                            dragData: spc.isBlack === this.isBlackTurn
                         }
 
                     sigframe.contentWindow.postMessage(opts, "*");
 
                     sigc.classList.add('piece-active');
 
-                    psig.querySelector('.name').textContent = ''+positionLetters[sel.piece.positionLetterIndex]+sel.piece.positionNumber;
-                    psig.querySelector('.correlation-score').textContent = ''+Math.round(calculateCorrelation(sig,this.targetSignal,true,true,false)*1e20)/1e18;
+                    let nmprfx = '';
+                    if (spc.isBlack !== this.isBlackTurn) nmprfx= '(Opponent) ';
+                    psig.querySelector('.name').textContent = nmprfx+positionLetters[spc.positionLetterIndex]+spc.positionNumber;
+                    psig.querySelector('.correlation-score').textContent = ''+(Math.round(calculateCorrelation(sig,this.targetSignal,true,true,false)*1e20)/1e18);
                 }
+
+                enableMoves(getPossibleMoves(spc.positionLetterIndex,spc.positionNumber,this.boardSquares));
             }
         }
     }
@@ -147,22 +175,63 @@ export class HomePage {
             bsqelem = pelem.parentNode.parentNode,
             l = parseInt(bsqelem.getAttribute(LETTER_INDEX_ATTRIB)),
             pn = parseInt(bsqelem.getAttribute(POSITION_NUMBER_ATTRIB)),
-            bsq = this.boardSquares[coordsToBoardIndex(l,pn)];
+            sel = this.boardSquares[coordsToBoardIndex(l,pn)],
+            osel = this.isBlackTurn ? this.whiteSelection : this.blackSelection,
+            side = this.isBlackTurn ? 'black' : 'white',
+            flipSide = this.isBlackTurn ? 'white' : 'black';
+
+        if (sel.piece == null) return;
+
+        let spc = sel.piece;
+
         if (this.isBlackTurn) {
-            if (this.whiteSelection != null) {
-                this.whiteSelection.nativeElement.querySelector('.piece').classList.remove('white-selection');
-                // this.whiteSelection.isWhiteSelected = false;
-            }
-            pelem.classList.add('white-selection');
-            this.whiteSelection = bsq;
+            // if (osel != null) osel.isWhiteSelected = false;
+            this.whiteSelection = null;
         } else {
-            if (this.blackSelection != null) {
-                this.blackSelection.nativeElement.querySelector('.piece').classList.remove('black-selection');
-                // this.blackSelection.isBlackSelected = false;
-            }
-            pelem.classList.add('black-selection');
-            this.blackSelection = bsq;
+            // if (osel != null) osel.isBlackSelected = false;
+            this.blackSelection = null;
         }
+
+        if (osel != null) {
+            let ospc = osel.piece;
+            osel.nativeElement.querySelector('.piece').classList.remove(flipSide+'-selection');
+
+            if (ospc != null && ospc.positionLetterIndex === spc.positionLetterIndex && ospc.positionNumber === spc.positionNumber) {
+                if (this.isSimpleMode === false) document.querySelector('.'+flipSide+'.signals-container').classList.remove('piece-active');
+
+                return;
+            }
+        }
+
+        if (this.isBlackTurn) {
+            this.whiteSelection = sel;
+        } else {
+            this.blackSelection = sel;
+        }
+
+        if (this.isSimpleMode === false) {
+            let sigc = document.querySelector('.'+flipSide+'.signals-container'),
+                psig = sigc.querySelector('.piece.signal'),
+                sigframe = psig.querySelector('iframe'),
+                opp_psig = document.querySelector('.'+side+'.signals-container .piece.signal'),
+                sig_t = spc.signal.map(x=>''+(Math.round(x*100)/100)),
+                opts = {
+                    labels: sig_t,
+                    data: spc.signal,
+                    dragData: false
+                }
+
+            let nmprfx = '';
+            if (spc.isBlack === this.isBlackTurn) nmprfx= '(Opponent) ';
+            psig.querySelector('.name').textContent = nmprfx+positionLetters[spc.positionLetterIndex]+spc.positionNumber;
+            psig.querySelector('.correlation-score').textContent = ''+(Math.round(calculateCorrelation(spc.signal,this.targetSignal,true,true,false)*1e20)/1e18);
+
+            sigframe.contentWindow.postMessage(opts, "*");
+
+            sigc.classList.add('piece-active');
+        }
+
+        pelem.classList.add(flipSide+'-selection');
     }
 
     colorPickerTap(e) {
@@ -173,11 +242,7 @@ export class HomePage {
             c = e.target.parentNode.parentNode.getAttribute(PIECE_COLOR_ATTRIB),
             ci = pieceSimpleColors.indexOf(c);
 
-        if (oci === ci) {
-            // TODO: show toast saying color must be different
-            return;
-        }
-
+        if (oci === ci) return;
         if (ci === this.prevColorIndex) {
             // TODO: show toast saying color must change because piece was disturbed
         }
@@ -204,7 +269,7 @@ export class HomePage {
 }
 
 // applies to only complex mode
-let processSignalChange = (index: number, value: number, selection: BoardSquare, targetSignal: number[], isStart: boolean, isEnd: boolean)=> {
+let signalChange_ = (index: number, value: number, selection: BoardSquare, targetSignal: number[], isStart: boolean, isEnd: boolean, isBothSelection: boolean)=> {
     // update piece signal
     let spc = selection.piece,
         signal = spc.signal;
@@ -220,19 +285,37 @@ let processSignalChange = (index: number, value: number, selection: BoardSquare,
         letter = positionLetters[spc.positionLetterIndex],
         number = spc.positionNumber,
         sclr = pieceSimpleColors[index];
+
+    let opp_psig = null;
+    if (isBothSelection) {
+        opp_psig = selection.piece.isBlack ? document.querySelector('.white .piece.signal') : document.querySelector('.black .piece.signal');
+    }
+
     if (isStart) {
         pvwr.classList.add('active');
         psig.querySelector('div:first-child').classList.add('changing');
+        if (isBothSelection) opp_psig.querySelector('div:first-child').classList.add('changing');
     }
     pclrasp.setAttribute(ASPECT_COLOR_ATTRIB, sclr);
     pclrasp.querySelector('span').textContent = ''+letter+number;
-    pcam.querySelector('span').textContent = ''+Math.round(value*1e18)/1e18;
-    psig.querySelector('.correlation-score').textContent = ''+Math.round(corr*1e20)/1e18;
+    pcam.querySelector('span').textContent = ''+(Math.round(value*1e18)/1e18);
+    psig.querySelector('.correlation-score').textContent = ''+(Math.round(corr*1e20)/1e18);
     // TODO: use selection.isBlackSelected && selection.isWhiteSelected to determine
     // which iframes should be updated
+    if (isBothSelection) {
+        let sig_t = signal.map(x=>''+(Math.round(x*100)/100)),
+            opts = {
+                labels: sig_t,
+                data:  signal,
+                dragData: false
+            }
+        opp_psig.querySelector('.correlation-score').textContent = ''+(Math.round(corr*1e20)/1e18);
+        opp_psig.querySelector('iframe').contentWindow.postMessage(opts, '*');
+    }
     if (isEnd) {
         pvwr.classList.remove('active');
         psig.querySelector('div:first-child').classList.remove('changing');
+        if (isBothSelection) opp_psig.querySelector('div:first-child').classList.remove('changing');
     }
 }
 
@@ -271,6 +354,7 @@ let calculateCorrelation = (sig: number[], tsig: number[], diversityIsRelative: 
         progDivDiff = gavgs.reduce((t,n)=>t+n)/signal.length;
     }
     let corr = 1-Math.abs(progDivDiff);
+
     return Math.max(0,Math.min(1,corr));
 }
 
@@ -297,7 +381,7 @@ let normalize = (arr: number[])=> {
     return arr.map(x=>x/max);
 }
 
-let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSquare, isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[])=> {
+let pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSquare, isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[])=> {
     let pelem = e.target.parentNode,
         bsqelem = pelem.parentNode.parentNode,
         l = parseInt(bsqelem.getAttribute(LETTER_INDEX_ATTRIB)),
@@ -321,8 +405,10 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
             locked.piece = null;
             // locked.isBlackSelected = false;
             locked.isDisturbed = false;
-            locked.nativeElement.querySelector('.piece').classList.remove('disturbed');
-            locked.nativeElement.querySelector('.piece').classList.remove(selclass);
+            let lpelem = locked.nativeElement.querySelector('.piece');
+            lpelem.classList.remove('disturbed');
+            lpelem.classList.remove('black-selection');
+            lpelem.classList.remove('white-selection');
 
             updateSquarePair(bsq, locked, isSimpleMode);
 
@@ -335,10 +421,18 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
                     pckr.classList.remove('color-picker-active');
                     pckr.querySelector('button').setAttribute(DISABLED_ATTRIB, 'true');
                 });
-
-                // TODO: activate the other side's pickers if piece is selected
             } else {
-                // TODO: activate the other side's piece signal if piece is selected
+                let side = isBlackTurn ? 'black' : 'white',
+                    sigc = document.querySelector('.'+side+'.signals-container'),
+                    psig = sigc.querySelector('.piece.signal'),
+                    sigframe = psig.querySelector('iframe'),
+                    opts = {
+                        dragData: false
+                    }
+
+                psig.querySelector('.name').textContent = ''+positionLetters[spc.positionLetterIndex]+spc.positionNumber;
+
+                sigframe.contentWindow.postMessage(opts, "*");
             }
 
             // bsq.isBlackSelected = true;
@@ -354,10 +448,9 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
         if (selection != null) {
             let spc = selection.piece;
 
-            if (spc.isBlack === isBlackTurn) { // due side tapped own piece
+            if (spc.isBlack === isBlackTurn) { // due side tapped own piece again
                 removeFocus(selection, selclass, bsqs);
-
-            } else { // due side tapped opponent piece
+            } else { // due side tapped opponent piece again
                 selection.nativeElement.querySelector('.piece').classList.remove(selclass);
             }
 
@@ -370,7 +463,17 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
                 let oselc = document.querySelector('.'+side+'.color-picker button.selected');
                 if (oselc != null) oselc.classList.remove('selected');
             } else {
-                // TODO: hide/turn off piece signal
+                let side = isBlackTurn ? 'black' : 'white',
+                    sigc = document.querySelector('.'+side+'.signals-container'),
+                    psig = sigc.querySelector('.piece.signal'),
+                    sigframe = psig.querySelector('iframe'),
+                    opts = {
+                        dragData: false
+                    }
+
+                sigframe.contentWindow.postMessage(opts, "*");
+
+                sigc.classList.remove('piece-active');
             }
 
             // current selection is the same as what was tapped; remove focus
@@ -410,19 +513,21 @@ let processPieceTap = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: B
                 psig = sigc.querySelector('.piece.signal'),
                 sigframe = psig.querySelector('iframe'),
                 sig = spc.signal,
-                sig_t = sig.map(x=>''+Math.round(x*100)/100),
+                sig_t = sig.map(x=>''+(Math.round(x*100)/100)),
                 opts = {
                     labels: sig_t,
                     data:  sig,
-                    dragData: spc.isBlack === isBlackTurn
+                    dragData: spc.isBlack === isBlackTurn && (locked == null || (locked.piece.positionLetterIndex === l && locked.piece.positionNumber === pn))
                 }
 
             sigframe.contentWindow.postMessage(opts, "*");
 
             sigc.classList.add('piece-active');
 
-            psig.querySelector('.name').textContent = ''+positionLetters[spc.positionLetterIndex]+spc.positionNumber;
-            psig.querySelector('.correlation-score').textContent = ''+Math.round(calculateCorrelation(sig,targetSignal,true,true,false)*1e20)/1e18;
+            let nmprfx = '';
+            if (spc.isBlack !== isBlackTurn) nmprfx= '(Opponent) ';
+            psig.querySelector('.name').textContent = nmprfx+positionLetters[spc.positionLetterIndex]+spc.positionNumber;
+            psig.querySelector('.correlation-score').textContent = ''+(Math.round(calculateCorrelation(sig,targetSignal,true,true,false)*1e20)/1e18);
         }
     }
 
@@ -479,7 +584,7 @@ let setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackTur
 
     Array.prototype.forEach.call(document.getElementsByClassName('target signal'), (tsig)=> {
         let sigframe = tsig.querySelector('iframe'),
-            sig_t = targetSignal.map(x=>''+Math.round(x*100)/100),
+            sig_t = targetSignal.map(x=>''+(Math.round(x*100)/100)),
             opts = {
                 labels: sig_t,
                 data:  targetSignal,
