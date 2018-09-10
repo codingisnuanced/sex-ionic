@@ -1,34 +1,42 @@
 import { Component } from '@angular/core';
-import { MenuController } from 'ionic-angular';
+import { MenuController, Platform } from 'ionic-angular';
 
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
 })
-export class HomePage {
+export class SexGame {
 
-    boardSquares: BoardSquare[]; // [BoardSquare]
+    boardSquares: BoardSquare[];
     isSimpleMode: boolean = false;
     isBlackTurn: boolean = true;
-    blackSelection: BoardSquare; // BoardSquare
-    whiteSelection: BoardSquare; // BoardSquare
-    blackLocked: BoardSquare; // BoardSquare
-    whiteLocked: BoardSquare; // BoardSquare
-    blackSignal: number[] = [0.5,0.5,0.5,0.5,0.5,0.5];
-    whiteSignal: number[] = [0.5,0.5,0.5,0.5,0.5,0.5];
+    blackSelection: BoardSquare;
+    whiteSelection: BoardSquare;
+    blackLocked: BoardSquare;
+    whiteLocked: BoardSquare;
+    blackSignal: Process[];
+    whiteSignal: Process[];
     targetSignal: number[];
     prevColorIndex: number;
     prevSignal: number[];
 
-    constructor(public menu: MenuController) {
+    constructor(public platform: Platform, public menu: MenuController) {
         menu.enable(true);
 
         this.targetSignal = [Math.random(),Math.random(),Math.random(),Math.random(),Math.random(),Math.random()];
+        this.blackSignal = [];
+        this.whiteSignal = [];
+        for (let i = 0; i < this.targetSignal.length; i++) {
+            this.whiteSignal.push(new Process(0.5));
+            this.blackSignal.push(new Process(0.5));
+        }
     }
 
     ngAfterViewInit() {
-        // TODO: particlesJS config should be loaded with consideration of screen size
-        window['particlesJS'].load('page-home-content', 'assets/config/particles.json', ()=> {
+
+        let pjscfg = 'mobile';
+        if (this.platform.is('core') || this.platform.is('tablet')) pjscfg = 'desktop';
+        window['particlesJS'].load('page-home-content', 'assets/config/'+pjscfg+'_particles.json', ()=> {
             console.log('callback - particles.js config loaded');
         });
 
@@ -48,7 +56,7 @@ export class HomePage {
                         }
                         break;
                     case 'score':
-                        let scsig = e.data.side === 'black' ? this.blackSignal : this.whiteSignal;
+                        let scsig = e.data.side === 'black' ? stripSignal(this.blackSignal) : stripSignal(this.whiteSignal);
                         sig_t = scsig.map(x=>''+(Math.round(x*100)/100)),
                         opts = {
                             labels: sig_t,
@@ -65,13 +73,12 @@ export class HomePage {
                 return;
             }
 
-            let locked = null;
+            let locked : BoardSquare = null;
             if (this.isBlackTurn) {
                 locked = this.blackLocked = this.blackSelection;
             } else {
                 locked = this.whiteLocked = this.whiteSelection;
             }
-            locked.isDisturbed = true;
             locked.nativeElement.querySelector('.piece').classList.add('disturbed');
             let isBothSelection = false;
             if (this.blackSelection != null && this.whiteSelection != null) {
@@ -79,6 +86,7 @@ export class HomePage {
                     wp = this.whiteSelection.piece;
                 isBothSelection = bp.positionLetterIndex === wp.positionLetterIndex && bp.positionNumber === wp.positionNumber;
             }
+            if (this.prevSignal == null) this.prevSignal = locked.piece.signal.slice(0,locked.piece.signal.length);
             signalChange_(e.data.index, e.data.value, locked, this.targetSignal, e.data.isStart, e.data.isEnd, isBothSelection);
         });
 
@@ -88,12 +96,12 @@ export class HomePage {
     pieceTap(e) {
         let res = null;
         if(this.isBlackTurn) {
-            res = pieceTap_(e, this.boardSquares, this.blackSelection, this.blackLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal);
+            res = pieceTap_(e, this.boardSquares, this.blackSelection, this.blackLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal, this.prevColorIndex, this.prevSignal, this.blackSignal);
             this.blackSelection = res.selection;
             this.blackLocked = res.locked;
             this.isBlackTurn = res.isBlackTurn;
         } else {
-            res = pieceTap_(e, this.boardSquares, this.whiteSelection, this.whiteLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal);
+            res = pieceTap_(e, this.boardSquares, this.whiteSelection, this.whiteLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal, this.prevColorIndex, this.prevSignal, this.whiteSignal);
             this.whiteSelection = res.selection;
             this.whiteLocked = res.locked;
             this.isBlackTurn = res.isBlackTurn;
@@ -159,9 +167,7 @@ export class HomePage {
 
                     sigc.classList.add('piece-active');
 
-                    let nmprfx = '';
-                    if (spc.isBlack !== this.isBlackTurn) nmprfx= '(Opponent) ';
-                    psig.querySelector('.name').textContent = nmprfx+positionLetters[spc.positionLetterIndex]+spc.positionNumber;
+                    psig.querySelector('.name').textContent = ''+positionLetters[spc.positionLetterIndex]+spc.positionNumber;
                     psig.querySelector('.correlation-score').textContent = ''+(Math.round(calculateCorrelation(sig,this.targetSignal,true,true,false)*1e20)/1e18);
                 }
 
@@ -177,18 +183,17 @@ export class HomePage {
             pn = parseInt(bsqelem.getAttribute(POSITION_NUMBER_ATTRIB)),
             sel = this.boardSquares[coordsToBoardIndex(l,pn)],
             osel = this.isBlackTurn ? this.whiteSelection : this.blackSelection,
-            side = this.isBlackTurn ? 'black' : 'white',
+            // side = this.isBlackTurn ? 'black' : 'white',
             flipSide = this.isBlackTurn ? 'white' : 'black';
 
+        // if (sel.piece == null || (this.isSimpleMode && sel.piece.isBlack === this.isBlackTurn)) return;
         if (sel.piece == null) return;
 
         let spc = sel.piece;
 
         if (this.isBlackTurn) {
-            // if (osel != null) osel.isWhiteSelected = false;
             this.whiteSelection = null;
         } else {
-            // if (osel != null) osel.isBlackSelected = false;
             this.blackSelection = null;
         }
 
@@ -213,7 +218,6 @@ export class HomePage {
             let sigc = document.querySelector('.'+flipSide+'.signals-container'),
                 psig = sigc.querySelector('.piece.signal'),
                 sigframe = psig.querySelector('iframe'),
-                opp_psig = document.querySelector('.'+side+'.signals-container .piece.signal'),
                 sig_t = spc.signal.map(x=>''+(Math.round(x*100)/100)),
                 opts = {
                     labels: sig_t,
@@ -240,22 +244,28 @@ export class HomePage {
             oselc = document.querySelector('.'+side+'.color-picker button.selected'),
             oci = pieceSimpleColors.indexOf(oselc.parentElement.parentElement.getAttribute(PIECE_COLOR_ATTRIB)),
             c = e.target.parentNode.parentNode.getAttribute(PIECE_COLOR_ATTRIB),
-            ci = pieceSimpleColors.indexOf(c);
+            ci = pieceSimpleColors.indexOf(c),
+            sel = this.isBlackTurn ? this.blackSelection : this.whiteSelection;
 
         if (oci === ci) return;
+
+        if (getPossibleMoves(sel.piece.positionLetterIndex, sel.piece.positionNumber, this.boardSquares).length === 0) {
+            // TODO: show toast; piece is blocked at all directions
+            return;
+        }
+
         if (ci === this.prevColorIndex) {
             // TODO: show toast saying color must change because piece was disturbed
         }
 
         if (this.isBlackTurn) {
-            this.blackLocked = locked = this.blackSelection;
+            this.blackLocked = locked = sel;
         } else {
-            this.whiteLocked = locked = this.whiteSelection;
+            this.whiteLocked = locked = sel;
         }
 
         if (this.prevColorIndex == null) this.prevColorIndex = oci;
 
-        locked.isDisturbed = true;
         locked.nativeElement.querySelector('.piece').classList.add('disturbed');
 
         // remove focus from current color picker
@@ -268,8 +278,101 @@ export class HomePage {
     }
 }
 
+const interact = (mover: BoardSquare, sig_: Process[], bsqs: BoardSquare[], targetSignal: number[], isSimpleMode: boolean)=> {
+    if (mover.piece == null) return;
+
+    let nbrs = getNeighbors(mover.piece.positionLetterIndex, mover.piece.positionNumber, bsqs, mover.piece.isBlack);
+
+    // TODO: show toast; D4 interacts with E4, D5
+
+    nbrs.forEach((nbr)=> {
+        if (isSimpleMode) {
+            let bias = mover.piece.colorIndex === nbr.square.piece.colorIndex ? Process.positiveBound(nbr.bias*2) : nbr.bias;
+            sig_[nbr.square.piece.colorIndex].update(bias);
+        } else {
+            let avgsig = averageSignals(mover.piece.signal, nbr.square.piece.signal);
+            for (let i = 0; i < sig_.length; i++) { sig_[i].update(avgsig[i]); }
+        }
+    });
+
+    // update score signal
+    // calculate correlation of score signal
+
+    let side = mover.piece.isBlack ? 'black' : 'white',
+        scsig = document.querySelector('.'+side+' .score.signal'),
+        sccorr = scsig.querySelector('.correlation-score'),
+        scframe = scsig.querySelector('iframe'),
+        sig = stripSignal(sig_),
+        sig_t = sig.map(x=>''+Math.round(x*100)/100),
+        opts = {
+            labels: sig_t,
+            data: sig
+        }
+
+    sccorr.textContent = ''+(Math.round(calculateCorrelation(sig,targetSignal,true,true,false)*1e20)/1e18);
+    scframe.contentWindow.postMessage(opts, '*');
+}
+
+const biasForDirection = (direction: string, isReversed: boolean)=> {
+    switch (direction) {
+        case 'up': return isReversed ? 0.5 : 1;
+        case 'top-right': return isReversed ? 0.375 : 0.875;
+        case 'right': return isReversed ? 0.25 : 0.75;
+        case 'bottom-right': return isReversed ? 0.125 : 0.625;
+        case 'down': return isReversed ? 1 : 0.5;
+        case 'bottom-left': return isReversed ? 0.875 : 0.375;
+        case 'left': return isReversed ? 0.75 : 0.25;
+        case 'top-left': return isReversed ? 0.625 : 0.125;
+        default: return 0;
+    }
+}
+
+const getNeighbors = (positionLetterIndex: number, positionNumber: number, bsqs: BoardSquare[], isForBlack)=> {
+    let psbsqs = [],
+        prevl = positionLetterIndex-1,
+        nextl = positionLetterIndex+1,
+        prevn = positionNumber-1,
+        nextn = positionNumber+1,
+        bsq: BoardSquare = null;
+
+    if (prevl >= 0) {
+        bsq = bsqs[coordsToBoardIndex(prevl,positionNumber)]; // left
+        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('left', !isForBlack)});
+        if (prevn >= 0) {
+            bsq = bsqs[coordsToBoardIndex(prevl,prevn)]; // bottom-left
+            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('bottom-left', !isForBlack)});
+        }
+        if (nextn < 6) {
+            bsq = bsqs[coordsToBoardIndex(prevl,nextn)]; // top-left
+            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('top-left', !isForBlack)});
+        }
+    }
+    if (nextl < 6) {
+        bsq = bsqs[coordsToBoardIndex(nextl,positionNumber)]; // right
+        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('right', !isForBlack)});
+        if (prevn >= 0) {
+            bsq = bsqs[coordsToBoardIndex(nextl,prevn)]; // bottom-right
+            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('bottom-right', !isForBlack)});
+        }
+        if (nextn < 6) {
+            bsq = bsqs[coordsToBoardIndex(nextl,nextn)]; // top-right
+            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('top-right', !isForBlack)});
+        }
+    }
+    if (prevn >= 0) {
+        bsq = bsqs[coordsToBoardIndex(positionLetterIndex,prevn)]; // down
+        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('down', !isForBlack)});
+    }
+    if (nextn < 6) {
+        bsq = bsqs[coordsToBoardIndex(positionLetterIndex,nextn)]; // up
+        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('up', !isForBlack)});
+    }
+
+    return psbsqs;
+}
+
 // applies to only complex mode
-let signalChange_ = (index: number, value: number, selection: BoardSquare, targetSignal: number[], isStart: boolean, isEnd: boolean, isBothSelection: boolean)=> {
+const signalChange_ = (index: number, value: number, selection: BoardSquare, targetSignal: number[], isStart: boolean, isEnd: boolean, isBothSelection: boolean)=> {
     // update piece signal
     let spc = selection.piece,
         signal = spc.signal;
@@ -293,15 +396,13 @@ let signalChange_ = (index: number, value: number, selection: BoardSquare, targe
 
     if (isStart) {
         pvwr.classList.add('active');
-        psig.querySelector('div:first-child').classList.add('changing');
-        if (isBothSelection) opp_psig.querySelector('div:first-child').classList.add('changing');
+        psig.querySelector('.info').classList.add('changing');
+        if (isBothSelection) opp_psig.querySelector('.info').classList.add('changing');
     }
     pclrasp.setAttribute(ASPECT_COLOR_ATTRIB, sclr);
     pclrasp.querySelector('span').textContent = ''+letter+number;
     pcam.querySelector('span').textContent = ''+(Math.round(value*1e18)/1e18);
     psig.querySelector('.correlation-score').textContent = ''+(Math.round(corr*1e20)/1e18);
-    // TODO: use selection.isBlackSelected && selection.isWhiteSelected to determine
-    // which iframes should be updated
     if (isBothSelection) {
         let sig_t = signal.map(x=>''+(Math.round(x*100)/100)),
             opts = {
@@ -314,12 +415,12 @@ let signalChange_ = (index: number, value: number, selection: BoardSquare, targe
     }
     if (isEnd) {
         pvwr.classList.remove('active');
-        psig.querySelector('div:first-child').classList.remove('changing');
-        if (isBothSelection) opp_psig.querySelector('div:first-child').classList.remove('changing');
+        psig.querySelector('.info').classList.remove('changing');
+        if (isBothSelection) opp_psig.querySelector('.info').classList.remove('changing');
     }
 }
 
-let calculateCorrelation = (sig: number[], tsig: number[], diversityIsRelative: boolean, useDistance: boolean, shouldNormalize: boolean)=> {
+const calculateCorrelation = (sig: number[], tsig: number[], diversityIsRelative: boolean, useDistance: boolean, shouldNormalize: boolean)=> {
     let g = [], gavgs = [], sum = 0,
         signal = sig.slice(0,sig.length),
         targetSignal = tsig.slice(0,tsig.length);
@@ -358,59 +459,48 @@ let calculateCorrelation = (sig: number[], tsig: number[], diversityIsRelative: 
     return Math.max(0,Math.min(1,corr));
 }
 
-let perms = (signal: number[])=> {
-    let ps = [];
-
-    for (let i = 0; i < signal.length; i++) {
-        let signal_ = signal.slice(0,signal.length);
-        signal_.splice(i,1);
-        let subps = perms(signal_);
-        if (subps.length == 0) subps.push([]);
-        subps.forEach((subp)=> {
-            subp.unshift(signal[i]);
-            ps.push(subp);
-        });
-    }
-
-    return ps;
-}
-
-let normalize = (arr: number[])=> {
-    let max = Math.max(...arr);
-    if (max === 0) return arr;
-    return arr.map(x=>x/max);
-}
-
-let pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSquare, isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[])=> {
+const pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSquare, isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[], prevColorIndex: number, prevSignal: number[], procSig: Process[])=> {
     let pelem = e.target.parentNode,
         bsqelem = pelem.parentNode.parentNode,
         l = parseInt(bsqelem.getAttribute(LETTER_INDEX_ATTRIB)),
         pn = parseInt(bsqelem.getAttribute(POSITION_NUMBER_ATTRIB)),
         bsq = bsqs[coordsToBoardIndex(l,pn)],
-        pc = bsq.piece,
         selclass = isBlackTurn ? 'black-selection' : 'white-selection',
         side = isBlackTurn ? 'black' : 'white',
         didMove = false;
 
-    if (pc == null) { // move current locked
+    if (bsq.piece == null) { // move current locked
         if (locked == null) {
             // TODO: do toast: need to change the piece first
         } else {
             let spc = locked.piece;
-            // TODO:
-            // if simple, ensure prev color index is different from
-            // if complex, ensure that piece signal is different from changed signal (iframe messaging)
+            if ((isSimpleMode && spc.colorIndex === prevColorIndex) || (isSimpleMode === false && arraysEqual(spc.signal, prevSignal))) {
+                // TODO: toast it up
+                if (isSimpleMode) {
+
+                } else {
+
+                }
+
+                return {
+                    selection: selection,
+                    locked: locked,
+                    isBlackTurn: isBlackTurn
+                }
+            }
+
             voidMoves(getPossibleMoves(spc.positionLetterIndex, spc.positionNumber, bsqs));
+
             bsq.piece = spc;
             locked.piece = null;
-            // locked.isBlackSelected = false;
-            locked.isDisturbed = false;
             let lpelem = locked.nativeElement.querySelector('.piece');
             lpelem.classList.remove('disturbed');
             lpelem.classList.remove('black-selection');
             lpelem.classList.remove('white-selection');
 
             updateSquarePair(bsq, locked, isSimpleMode);
+
+            interact(bsq, procSig, bsqs, targetSignal, isSimpleMode);
 
             if (isSimpleMode) {
                 let oselc = document.querySelector('.'+side+'.color-picker button.selected');
@@ -432,10 +522,12 @@ let pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSq
 
                 psig.querySelector('.name').textContent = ''+positionLetters[spc.positionLetterIndex]+spc.positionNumber;
 
+                sigc.classList.remove('piece-active');
+                bsq.nativeElement.querySelector('.piece').classList.remove(side+'-selection'); // NOTE: do this in updateSquarePair?
+
                 sigframe.contentWindow.postMessage(opts, "*");
             }
 
-            // bsq.isBlackSelected = true;
             selection = bsq;
             pelem.classList.add(selclass);
             locked = null;
@@ -445,6 +537,12 @@ let pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSq
             alternatePieceState(bsqs,isBlackTurn);
         }
     } else {
+        // if (isSimpleMode && bsq.piece.isBlack !== isBlackTurn)
+        //     return {
+        //         selection: selection,
+        //         locked: locked,
+        //         isBlackTurn: isBlackTurn,
+        //     }
         if (selection != null) {
             let spc = selection.piece;
 
@@ -477,22 +575,30 @@ let pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSq
             }
 
             // current selection is the same as what was tapped; remove focus
-            if (spc.positionLetterIndex === l && spc.positionNumber === pn) {
+            if (spc.positionLetterIndex === l && spc.positionNumber === pn)
                 return {
                     selection: null,
                     locked: locked,
                     isBlackTurn: isBlackTurn
                 }
-            }
         }
 
-        // bsq.isBlackSelected = true;
         selection = bsq;
         pelem.classList.add(selclass);
-        if (bsq.piece.isBlack == isBlackTurn && (locked == null || (locked.piece.positionLetterIndex === l && locked.piece.positionNumber === pn)))
-            enableMoves(getPossibleMoves(l,pn,bsqs));
+        let spc = selection.piece,
+            pmvs = getPossibleMoves(l,pn,bsqs);
 
-        let spc = selection.piece;
+        if (bsq.piece.isBlack == isBlackTurn && (locked == null || (locked.piece.positionLetterIndex === l && locked.piece.positionNumber === pn)))
+            enableMoves(pmvs);
+
+        if (pmvs.length === 0) {
+            // TODO: show toast: that piece is blocked at all directions!
+            if (isBlackTurn && spc.isBlack) {
+                // toast to the black side
+            } else if (isBlackTurn === false && spc.isBlack === false) {
+                // toast to the white side
+            }
+        }
 
         if (isSimpleMode) {
             if (spc.isBlack === isBlackTurn && (locked == null || (locked.piece.positionLetterIndex === l && locked.piece.positionNumber === pn))) {
@@ -517,7 +623,7 @@ let pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSq
                 opts = {
                     labels: sig_t,
                     data:  sig,
-                    dragData: spc.isBlack === isBlackTurn && (locked == null || (locked.piece.positionLetterIndex === l && locked.piece.positionNumber === pn))
+                    dragData: spc.isBlack === isBlackTurn && (locked == null || (locked.piece.positionLetterIndex === l && locked.piece.positionNumber === pn)) && pmvs.length > 0
                 }
 
             sigframe.contentWindow.postMessage(opts, "*");
@@ -539,7 +645,7 @@ let pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSq
     }
 }
 
-let enableMoves = (bsqs: BoardSquare[])=> {
+const enableMoves = (bsqs: BoardSquare[])=> {
     bsqs.forEach((bsq)=> {
         let ta = bsq.nativeElement.querySelector('.touch-area');
         ta.removeAttribute(DISABLED_ATTRIB);
@@ -547,7 +653,7 @@ let enableMoves = (bsqs: BoardSquare[])=> {
     });
 }
 
-let voidMoves = (bsqs: BoardSquare[])=> {
+const voidMoves = (bsqs: BoardSquare[])=> {
     bsqs.forEach((bsq)=> {
         let ta = bsq.nativeElement.querySelector('.touch-area');
         ta.setAttribute(DISABLED_ATTRIB, 'true');
@@ -556,7 +662,7 @@ let voidMoves = (bsqs: BoardSquare[])=> {
 }
 
 // Be sure to remove focus before moving a piece finally
-let removeFocus = (bsq: BoardSquare, selclass: string, bsqs: BoardSquare[])=> {
+const removeFocus = (bsq: BoardSquare, selclass: string, bsqs: BoardSquare[])=> {
     let pelem = bsq.nativeElement.querySelector('.piece'),
         pc = bsq.piece;
     pelem.classList.remove(selclass);
@@ -565,7 +671,7 @@ let removeFocus = (bsq: BoardSquare, selclass: string, bsqs: BoardSquare[])=> {
 
 // TODO: Before loading a saved game, use the coordinates of pieces to retrieve
 // BoardSquare DOMElements to construct BoardSquare object array for this function.
-let setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[], isNewGame: boolean)=> {
+const setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[], isNewGame: boolean)=> {
 
     if (isNewGame) {
         for (let i = 0; i < 6; i++) {
@@ -623,7 +729,7 @@ let setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackTur
     return boardSquares;
 }
 
-let alternatePieceState = (bsqs: BoardSquare[], isBlackTurn: boolean)=> {
+const alternatePieceState = (bsqs: BoardSquare[], isBlackTurn: boolean)=> {
     bsqs.forEach((bsq)=> {
         if (bsq.piece != null && bsq.piece.isBlack === isBlackTurn) {
             bsq.nativeElement.querySelector('.piece').classList.add('woke');
@@ -634,7 +740,7 @@ let alternatePieceState = (bsqs: BoardSquare[], isBlackTurn: boolean)=> {
     });
 }
 
-let updateSquarePair = (nbsq: BoardSquare, obsq: BoardSquare, isSimpleMode: boolean)=> {
+const updateSquarePair = (nbsq: BoardSquare, obsq: BoardSquare, isSimpleMode: boolean)=> {
     let p = nbsq.piece,
         npc = nbsq.nativeElement.querySelector('.piece'),
         npcb = nbsq.nativeElement.querySelector('.touch-area'),
@@ -654,44 +760,112 @@ let updateSquarePair = (nbsq: BoardSquare, obsq: BoardSquare, isSimpleMode: bool
     opcb.setAttribute(DISABLED_ATTRIB, 'true');
 }
 
-let getPossibleMoves = (positionLetterIndex: number, positionNumber: number, bsqs: BoardSquare[])=> {
-    let psbsqs = [], psbsqs_ = [],
+const getPossibleMoves = (positionLetterIndex: number, positionNumber: number, bsqs: BoardSquare[])=> {
+    let psbsqs = [],
         prevl = positionLetterIndex-1,
         nextl = positionLetterIndex+1,
         prevn = positionNumber-1,
-        nextn = positionNumber+1;
+        nextn = positionNumber+1,
+        bsq: BoardSquare = null;
+
     if (prevl >= 0) {
-        psbsqs_.push(bsqs[coordsToBoardIndex(prevl,positionNumber)]); // left
-        if (prevn >= 0) psbsqs_.push(bsqs[coordsToBoardIndex(prevl,prevn)]); // bottom-left
-        if (nextn < 6) psbsqs_.push(bsqs[coordsToBoardIndex(prevl,nextn)]); // top-left
+        bsq = bsqs[coordsToBoardIndex(prevl,positionNumber)]; // left
+        if (bsq.piece == null) psbsqs.push(bsq);
+        if (prevn >= 0) {
+            bsq = bsqs[coordsToBoardIndex(prevl,prevn)]; // bottom-left
+            if (bsq.piece == null) psbsqs.push(bsq);
+        }
+        if (nextn < 6) {
+            bsq = bsqs[coordsToBoardIndex(prevl,nextn)]; // top-left
+            if (bsq.piece == null) psbsqs.push(bsq);
+        }
     }
     if (nextl < 6) {
-        psbsqs_.push(bsqs[coordsToBoardIndex(nextl,positionNumber)]); // right
-        if (prevn >= 0) psbsqs_.push(bsqs[coordsToBoardIndex(nextl,prevn)]); // bottom-right
-        if (nextn < 6) psbsqs_.push(bsqs[coordsToBoardIndex(nextl,nextn)]); // top-right
+        bsq = bsqs[coordsToBoardIndex(nextl,positionNumber)]; // right
+        if (bsq.piece == null) psbsqs.push(bsq);
+        if (prevn >= 0) {
+            bsq = bsqs[coordsToBoardIndex(nextl,prevn)]; // bottom-right
+            if (bsq.piece == null) psbsqs.push(bsq);
+        }
+        if (nextn < 6) {
+            bsq = bsqs[coordsToBoardIndex(nextl,nextn)]; // top-right
+            if (bsq.piece == null) psbsqs.push(bsq);
+        }
     }
-    if (prevn >= 0) psbsqs_.push(bsqs[coordsToBoardIndex(positionLetterIndex,prevn)]); // up
-    if (nextn < 6) psbsqs_.push(bsqs[coordsToBoardIndex(positionLetterIndex,nextn)]); // down
-
-    psbsqs_.forEach((psbsq)=> {
-        if (psbsq.piece == null) psbsqs.push(psbsq);
-    });
+    if (prevn >= 0) {
+        bsq = bsqs[coordsToBoardIndex(positionLetterIndex,prevn)]; // down
+        if (bsq.piece == null) psbsqs.push(bsq);
+    }
+    if (nextn < 6) {
+        bsq = bsqs[coordsToBoardIndex(positionLetterIndex,nextn)]; // up
+        if (bsq.piece == null) psbsqs.push(bsq);
+    }
 
     return psbsqs;
 }
 
-let coordsToBoardIndex = (positionLetterIndex: number, positionNumber: number)=> {
-    return 5*(5-positionNumber)+(5-positionNumber)+positionLetterIndex;
-}
-
-let gatherBoardSquares = ()=> {
+const gatherBoardSquares = ()=> {
     let bsqs = [];
     let bsqs_ = document.getElementsByClassName('square playable');
     for (let i = 0; i < bsqs_.length; i++) {
-        bsqs.push(new BoardSquare(null,bsqs_[i],false,false,false));
+        bsqs.push(new BoardSquare(null,bsqs_[i]));
     }
 
     return bsqs;
+}
+
+const coordsToBoardIndex = (positionLetterIndex: number, positionNumber: number)=> {
+    return 5*(5-positionNumber)+(5-positionNumber)+positionLetterIndex;
+}
+
+const perms = (signal: number[])=> {
+    let ps = [];
+
+    for (let i = 0; i < signal.length; i++) {
+        let signal_ = signal.slice(0,signal.length);
+        signal_.splice(i,1);
+        let subps = perms(signal_);
+        if (subps.length == 0) subps.push([]);
+        subps.forEach((subp)=> {
+            subp.unshift(signal[i]);
+            ps.push(subp);
+        });
+    }
+
+    return ps;
+}
+
+const averageSignals = (siga: number[], sigb: number[])=> {
+    let sigc = [];
+    for (let i = 0; i < siga.length; i++) {
+        let a = siga[i],
+            b = sigb[i];
+        if (b == null) b = 0;
+        sigc.push((a+b)/2);
+    }
+    return sigc;
+}
+
+const stripSignal = (procsig: Process[]) => { return procsig.map(proc=>proc.value); }
+
+const normalize = (arr: number[])=> {
+    let max = Math.max(...arr);
+    if (max === 0) return arr;
+    return arr.map(x=>x/max);
+}
+
+const arraysEqual = (a, b)=> {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+
+    // If you don't care about the order of the elements inside
+    // the array, you should sort both arrays here.
+
+    for (var i = 0; i < a.length; ++i) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
 }
 
 class Piece {
@@ -707,37 +881,74 @@ class Piece {
         this.positionLetterIndex = positionLetterIndex;
         this.positionNumber = positionNumber;
         let signal = [];
-        for (let i = 0; i < 6; i++) { signal.push(0.0000001); }
+        for (let i = 0; i < 6; i++) { signal.push(1e-6); }
         this.signal = signal;
     }
 }
 
-let pieceSimpleColors = ["red","green","orange","blue","yellow","purple"],
+const pieceSimpleColors = ["red","green","orange","blue","yellow","purple"],
     // pieceColors = ['Red','MediumSpringGreen','Orange','DodgerBlue','Yellow','Fuchsia'],
     positionLetters = ['A','B','C','D','E','F'];
 
 class BoardSquare {
     piece: Piece;
     nativeElement: Element;
-    isBlackSelected: boolean;
-    isWhiteSelected: boolean;
-    isDisturbed: boolean;
 
-    constructor(piece: Piece, nativeElement: Element, isBlackSelected: boolean, isWhiteSelected: boolean, isDisturbed: boolean) {
+    constructor(piece: Piece, nativeElement: Element) {
         this.piece = piece;
         this.nativeElement = nativeElement;
-        this.isBlackSelected = isBlackSelected;
-        this.isWhiteSelected = isWhiteSelected;
-        this.isDisturbed = isDisturbed;
     }
 }
 
-let LETTER_INDEX_ATTRIB = 'letterIndex',
+class Process {
+    times: number = 1;
+    total: number = 1;
+
+    constructor(public value: number) {
+    }
+
+    update(entry: number) {
+        let ov = this.value,
+            ototal = this.total,
+            otimes = this.times,
+            times = otimes+1,
+            total = ototal + entry,
+            nfq = total/times,
+            ofq = ototal/otimes,
+            denom = Math.max(nfq,ofq),
+            nov = (nfq-ofq)/denom;
+
+        if (nov === -Infinity || nov === Infinity)
+            nov = 0;
+
+        nov = Process.fullBound(nov);
+
+        let v = Process.positiveBound(ov*(1+nov));
+
+        this.value = v;
+        this.times = times;
+        this.total = total;
+    }
+
+    static fullBound(value: number) {
+        if (value < -1) return -1;
+        if (value > 1) return 1;
+        return value;
+    }
+
+    static positiveBound(value: number) {
+        if (value < 0) return 0;
+        if (value > 1) return 1;
+        return value;
+    }
+}
+
+const LETTER_INDEX_ATTRIB = 'letterIndex',
     POSITION_NUMBER_ATTRIB = 'number',
     PIECE_SIDE_ATTRIB = 'pieceSide',
     PIECE_COLOR_ATTRIB = 'pieceColor',
     ASPECT_COLOR_ATTRIB = 'aspectColor',
-    DISABLED_ATTRIB = 'disabled',
-    ADJUSTABLE_ATTRIB = 'adjustable';
-let BLACK_PROP = 'black',
+    DISABLED_ATTRIB = 'disabled';
+    // ADJUSTABLE_ATTRIB = 'adjustable';
+const BLACK_PROP = 'black',
     WHITE_PROP = 'white';

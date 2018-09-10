@@ -5,12 +5,12 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 
 import { SexApp } from './app.component';
-import { HomePage } from '../pages/home/home';
+import { SexGame } from '../pages/home/home';
 
 @NgModule({
   declarations: [
     SexApp,
-    HomePage
+    SexGame
   ],
   imports: [
     BrowserModule,
@@ -21,7 +21,7 @@ import { HomePage } from '../pages/home/home';
   bootstrap: [IonicApp],
   entryComponents: [
     SexApp,
-    HomePage
+    SexGame
   ],
   providers: [
     StatusBar,

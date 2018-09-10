@@ -329,9 +329,9 @@ page-home {
             position: absolute;
             color: white;
             background-color: #fefefe;
-            display: flex!important;
-            align-content: center!important;
-            align-items: center!important;
+            display: flex !important;
+            align-content: center !important;
+            align-items: center !important;
             justify-content: center;
             margin: auto;
             border: 1px solid rgb(245, 245, 245);
@@ -585,6 +585,7 @@ page-home {
 
             .piece.woke .content-area {
                 border-style: solid;
+                border-width: 2px;
             }
 
             .piece[pieceColor="black"] {

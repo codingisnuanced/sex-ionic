@@ -3,13 +3,13 @@ import { Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
-import { HomePage } from '../pages/home/home';
+import { SexGame } from '../pages/home/home';
 @Component({
     selector: 'sex-app',
     templateUrl: 'app.html'
 })
 export class SexApp {
-  rootPage:any = HomePage;
+  rootPage:any = SexGame;
 
   constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen) {
     platform.ready().then(() => {

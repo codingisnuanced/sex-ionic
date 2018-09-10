@@ -28,7 +28,7 @@ window.onload = ()=> {
             },
             options: {
                 animation: {
-                    duration: 0
+                    duration: signalType === 'target' || signalType === 'score' ? 1000 : 0
                 },
                 events: events,
                 responsive: false,
