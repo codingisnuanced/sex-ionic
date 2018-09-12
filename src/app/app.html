@@ -8,23 +8,23 @@
                         <span class="title"><img src="assets/imgs/tosoto-logo.png" alt="Tosoto Labs">Sex</span>
                         <br>
                         <span class="description">
-                            Playing II Complex, B-Logic | W-Intuition<br>
-                            With Dorothy
+                            Playing <span class="mode">Complex</span><br>
+                            <span class="with">With Dorothy</span>
                         </span>
                     </h6>
                 </div>
             </ion-item>
             <ion-item class="item-with-rules">
-                <button ion-button-small icon-only><ion-icon ios="ios-game-controller-a" md="ios-game-controller-a"></ion-icon><span class="menu-item-text heading button-text">Simple Sex</span></button>
-                <button ion-button-small icon-only><ion-icon ios="ios-book" md="ios-book"></ion-icon></button>
+                <button ion-button-small icon-only (tap)="startSimpleSex($event)"><ion-icon ios="ios-game-controller-a" md="ios-game-controller-a"></ion-icon><span class="menu-item-text heading button-text">Simple Sex</span></button>
+                <!-- <button ion-button-small icon-only><ion-icon ios="ios-book" md="ios-book"></ion-icon></button> -->
             </ion-item>
             <ion-item class="item-with-rules">
-                <button ion-button-small icon-only clear><ion-icon ios="ios-game-controller-a" md="ios-game-controller-a"></ion-icon><span class="menu-item-text heading button-text">Complex Sex</span></button>
-                <button ion-button-small icon-only><ion-icon ios="ios-book" md="ios-book"></ion-icon></button>
+                <button ion-button-small icon-only clear (tap)="startComplexSex($event)"><ion-icon ios="ios-game-controller-a" md="ios-game-controller-a"></ion-icon><span class="menu-item-text heading button-text">Complex Sex</span></button>
+                <!-- <button ion-button-small icon-only><ion-icon ios="ios-book" md="ios-book"></ion-icon></button> -->
             </ion-item>
-            <ion-item>
+            <!-- <ion-item>
                 <ion-label>
-                    <ion-icon ios="ios-analytics" md="ios-analytics" class="intuition-logic-icon"></ion-icon><span class="menu-item-text heading">Intuition-Logic</span>  (<a href="#">?</a>)
+                    <ion-icon ios="ios-analytics" md="ios-analytics" class="intuition-logic-icon"></ion-icon><span class="menu-item-text heading">Intuition-Logic</span>
                 </ion-label>
                 <ion-toggle checked="false" color="dark"></ion-toggle>
             </ion-item>
@@ -41,7 +41,25 @@
                     <span>or</span>
                     <button ion-button-small icon-only disabled clear class="control"><ion-icon ios="ios-calculator-outline" md="ios-calculator-outline"></ion-icon></button>
                 </div>
+            </ion-item> -->
+            <ion-item class="item-with-rules">
+                <button ion-button-small icon-only clear (tap)="loadSexTap($event)"><ion-icon ios="ios-game-controller-a" md="ios-game-controller-a"></ion-icon><span class="menu-item-text heading button-text">Load Sex</span></button>
+                <!-- <button ion-button-small icon-only><ion-icon ios="ios-book" md="ios-book"></ion-icon></button> -->
             </ion-item>
+            <div class="playing-with">
+                <ion-item class="title">
+                    <p>Playing with:</p>
+                </ion-item>
+                <ion-item class="">
+                    <ion-input type="text" placeholder="Name the current game" color="dark" maxlength="15" (input)="gameNameChange($event)" [(ngModel)]="playingWithInput"></ion-input>
+                </ion-item>
+                <ion-item>
+                    <p>(max 15)</p>
+                </ion-item>
+                <ion-item>
+                    <button ion-button clear color="dark" (tap)="saveSexTap($event)"><ion-icon name="ios-bookmark"></ion-icon>Save</button><span class="save-ack">Saved!</span>
+                </ion-item>
+            </div>
         </ion-list>
     </ion-content>
 

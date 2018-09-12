@@ -19,7 +19,7 @@
                     <div class="controls-container">
                         <button class="control" ion-button-small icon-only clear menuToggle><ion-icon name="more"></ion-icon></button>
                         <button class="control" ion-button-small icon-only clear><ion-icon ios="md-share" md="md-share"></ion-icon></button>
-                        <button class="control" ion-button-small icon-only clear><ion-icon name="ios-bookmark"></ion-icon></button>
+                        <button class="control load" ion-button-small clear (tap)="save($event)"><ion-icon name="ios-bookmark"></ion-icon>Save</button>
                     </div>
                     <div class="turns-taken">
                         <div class="valign-fix">

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { MenuController, Platform } from 'ionic-angular';
+import { Events, MenuController, Platform } from 'ionic-angular';
+import { Storage } from "@ionic/storage";
 
 @Component({
   selector: 'page-home',
@@ -8,7 +9,7 @@ import { MenuController, Platform } from 'ionic-angular';
 export class SexGame {
 
     boardSquares: BoardSquare[];
-    isSimpleMode: boolean = false;
+    isSimpleMode: boolean = true;
     isBlackTurn: boolean = true;
     blackSelection: BoardSquare;
     whiteSelection: BoardSquare;
@@ -19,26 +20,35 @@ export class SexGame {
     targetSignal: number[];
     prevColorIndex: number;
     prevSignal: number[];
+    name: string = '';
+    id: string;
 
-    constructor(public platform: Platform, public menu: MenuController) {
+    constructor(public platform: Platform, public menu: MenuController, public events: Events, private storage: Storage) {
         menu.enable(true);
 
-        this.targetSignal = [Math.random(),Math.random(),Math.random(),Math.random(),Math.random(),Math.random()];
-        this.blackSignal = [];
-        this.whiteSignal = [];
-        for (let i = 0; i < this.targetSignal.length; i++) {
-            this.whiteSignal.push(new Process(0.5));
-            this.blackSignal.push(new Process(0.5));
-        }
+        events.subscribe('game:save', (name: string)=> {
+            this.name = name;
+            this.save(null);
+        });
+
+        events.subscribe('game:load', (gs: GameState, id: string)=> {
+            this.load(gs,id);
+            menu.close();
+        });
+
+        events.subscribe('game:new', (isSimpleMode: boolean)=> {
+            this.reset(isSimpleMode);
+            menu.close();
+        });
+
+        events.subscribe('game:nameChange', (name:string)=> {
+            this.name = name;
+        });
     }
 
     ngAfterViewInit() {
 
-        let pjscfg = 'mobile';
-        if (this.platform.is('core') || this.platform.is('tablet')) pjscfg = 'desktop';
-        window['particlesJS'].load('page-home-content', 'assets/config/'+pjscfg+'_particles.json', ()=> {
-            console.log('callback - particles.js config loaded');
-        });
+        this.reset(this.isSimpleMode);
 
         window.addEventListener('message', (e)=> {
             if (e.data.frameReady) {
@@ -48,7 +58,7 @@ export class SexGame {
                     opts = null;
                 switch (e.data.signalType) {
                     case 'target':
-                        sig_t = this.targetSignal.map(x=>''+(Math.round(x*100)/100)),
+                        sig_t = this.targetSignal.map(x =>''+(Math.round(x*100)/100)),
                         opts = {
                             labels: sig_t,
                             data:  this.targetSignal,
@@ -57,7 +67,7 @@ export class SexGame {
                         break;
                     case 'score':
                         let scsig = e.data.side === 'black' ? stripSignal(this.blackSignal) : stripSignal(this.whiteSignal);
-                        sig_t = scsig.map(x=>''+(Math.round(x*100)/100)),
+                        sig_t = scsig.map(x =>''+(Math.round(x*100)/100)),
                         opts = {
                             labels: sig_t,
                             data:  scsig,
@@ -90,7 +100,145 @@ export class SexGame {
             signalChange_(e.data.index, e.data.value, locked, this.targetSignal, e.data.isStart, e.data.isEnd, isBothSelection);
         });
 
-        this.boardSquares = setupBoard(gatherBoardSquares(), this.isSimpleMode, this.isBlackTurn, this.targetSignal, true);
+        let pjscfg = 'mobile';
+        if (this.platform.is('core') || this.platform.is('tablet')) pjscfg = 'desktop';
+        window['particlesJS'].load('page-home-content', 'assets/config/'+pjscfg+'_particles.json', ()=> {});
+    }
+
+    reset(isSimpleMode: boolean) {
+        this.isSimpleMode = isSimpleMode;
+        this.isBlackTurn = true;
+        this.blackSelection = this.whiteSelection = null;
+        this.blackLocked = this.whiteLocked = null;
+        this.prevSignal = this.prevColorIndex = null;
+        this.name = null;
+        this.id = generateUUID();
+
+        let t = document.querySelector('.turns-taken');
+
+        t.querySelector('.black span').textContent = '1'
+        t.classList.add('current-turn');
+
+        t.querySelector('.white span').textContent = '0';
+        t.classList.remove('current-turn');
+
+        this.targetSignal = [Math.random(),Math.random(),Math.random(),Math.random(),Math.random(),Math.random()];
+        this.blackSignal = [];
+        this.whiteSignal = [];
+        for (let i = 0; i < this.targetSignal.length; i++) {
+            this.whiteSignal.push(new Process(0.5));
+            this.blackSignal.push(new Process(0.5));
+        }
+
+        resetColorPickers(true);
+        resetColorPickers(false);
+
+        resetPieceSignals(true);
+        resetPieceSignals(false);
+
+        this.boardSquares = gatherBoardSquares();
+        setupBoard(this.boardSquares, this.isSimpleMode, this.isBlackTurn, this.targetSignal, null);
+    }
+
+    load(gs: GameState, id: string) {
+        this.isSimpleMode = gs.isSimpleMode;
+        this.isBlackTurn = gs.isBlackTurn;
+        this.blackSelection = this.whiteSelection = null;
+        this.targetSignal = gs.targetSignal;
+        this.blackSignal = gs.blackSignal;
+        this.whiteSignal = gs.whiteSignal;
+        this.prevColorIndex = gs.prevColorIndex;
+        this.prevSignal = gs.prevSignal;
+        this.name = gs.name;
+        this.id = id;
+
+        this.boardSquares = gatherBoardSquares();
+
+        let bsq: BoardSquare = null;
+        if (gs.blackLocked > -1) {
+            bsq = this.boardSquares[gs.blackLocked];
+            bsq.nativeElement.classList.add('disturbed');
+            this.blackLocked = bsq;
+        }
+        if (gs.whiteLocked > -1) {
+            bsq = this.boardSquares[gs.whiteLocked];
+            bsq.nativeElement.classList.add('disturbed');
+            this.whiteLocked = bsq;
+        }
+
+        let t = document.querySelector('.turns-taken');
+
+        t.querySelector('.black span').textContent = gs.blackTurnsTaken.toString();
+        t.querySelector('.white span').textContent = gs.whiteTurnsTaken.toString();
+
+        setScoreSignal(true, this.blackSignal, this.targetSignal);
+        setScoreSignal(false, this.whiteSignal, this.targetSignal);
+
+        resetColorPickers(true);
+        resetColorPickers(false);
+
+        resetPieceSignals(true);
+        resetPieceSignals(false);
+
+        setupBoard(this.boardSquares, this.isSimpleMode, this.isBlackTurn, this.targetSignal, gs.boardSquares);
+
+        this.save(null);
+        this.events.publish('game:loaded', this.isSimpleMode, this.name);
+
+        // TODO: show toast; game was loaded
+    }
+
+    save(e) {
+        let gs = new GameState();
+        gs.isSimpleMode = this.isSimpleMode;
+        gs.isBlackTurn = this.isBlackTurn;
+        gs.targetSignal = this.targetSignal;
+        gs.blackSignal = this.blackSignal;
+        gs.whiteSignal = this.whiteSignal;
+        gs.prevColorIndex = this.prevColorIndex;
+        gs.prevSignal = this.prevSignal;
+        gs.name = this.name;
+        let spc: Piece = null;
+        if (this.blackSelection == null) {
+            gs.blackSelection = -1;
+        } else {
+            spc = this.blackSelection.piece;
+            gs.blackSelection = coordsToBoardIndex(spc.positionLetterIndex, spc.positionNumber);
+        }
+        if (this.blackLocked == null) {
+            gs.blackLocked = -1;
+        } else {
+            spc = this.blackLocked.piece;
+            gs.blackLocked = coordsToBoardIndex(spc.positionLetterIndex, spc.positionNumber);
+        }
+        if (this.whiteSelection == null) {
+            gs.whiteSelection = -1;
+        } else {
+            spc = this.whiteSelection.piece;
+            gs.whiteSelection = coordsToBoardIndex(spc.positionLetterIndex, spc.positionNumber);
+        }
+        if (this.whiteLocked == null) {
+            gs.whiteLocked = -1;
+        } else {
+            spc = this.whiteLocked.piece;
+            gs.whiteLocked = coordsToBoardIndex(spc.positionLetterIndex, spc.positionNumber);
+        }
+        gs.boardSquares = [];
+        this.boardSquares.forEach((bsq)=> {
+            gs.boardSquares.push(new BoardSquare(bsq.piece, null));
+        });
+
+        let t = document.querySelector('.turns-taken');
+        gs.blackTurnsTaken = parseInt(t.querySelector('.black span').textContent);
+        gs.whiteTurnsTaken = parseInt(t.querySelector('.white span').textContent);
+
+        gs.lastSaveDate = Date.now();
+
+        this.storage.set(this.id, gs);
+
+        this.events.publish('game:saved', true);
+
+        // TODO: show toast; game was saved
     }
 
     pieceTap(e) {
@@ -148,7 +296,7 @@ export class SexGame {
                     let pckrs = document.getElementsByClassName(side+' color-picker');
                     Array.prototype.forEach.call(pckrs, pckr=> {
                         pckr.classList.add('color-picker-active');
-                        pckr.querySelector('button').removeAttribute(DISABLED_ATTRIB);
+                        pckr.querySelector('button').removeAttribute(ATTRIBUTE_DISABLED);
                     });
                     pckrs[spc.colorIndex].querySelector('button').classList.add('selected');
                 } else {
@@ -179,8 +327,8 @@ export class SexGame {
     piecePress(e) {
         let pelem = e.target.parentNode,
             bsqelem = pelem.parentNode.parentNode,
-            l = parseInt(bsqelem.getAttribute(LETTER_INDEX_ATTRIB)),
-            pn = parseInt(bsqelem.getAttribute(POSITION_NUMBER_ATTRIB)),
+            l = parseInt(bsqelem.getAttribute(ATTRIBUTE_LETTER_INDEX)),
+            pn = parseInt(bsqelem.getAttribute(ATTRIBUTE_POSITION_NUMBER)),
             sel = this.boardSquares[coordsToBoardIndex(l,pn)],
             osel = this.isBlackTurn ? this.whiteSelection : this.blackSelection,
             // side = this.isBlackTurn ? 'black' : 'white',
@@ -242,8 +390,8 @@ export class SexGame {
         let locked: BoardSquare,
             side = this.isBlackTurn ? 'black' : 'white',
             oselc = document.querySelector('.'+side+'.color-picker button.selected'),
-            oci = pieceSimpleColors.indexOf(oselc.parentElement.parentElement.getAttribute(PIECE_COLOR_ATTRIB)),
-            c = e.target.parentNode.parentNode.getAttribute(PIECE_COLOR_ATTRIB),
+            oci = pieceSimpleColors.indexOf(oselc.parentElement.parentElement.getAttribute(ATTRIBUTE_PIECE_COLOR)),
+            c = e.target.parentNode.parentNode.getAttribute(ATTRIBUTE_PIECE_COLOR),
             ci = pieceSimpleColors.indexOf(c),
             sel = this.isBlackTurn ? this.blackSelection : this.whiteSelection;
 
@@ -274,7 +422,7 @@ export class SexGame {
         // select new color picker
         e.target.classList.add('selected');
         locked.piece.colorIndex = ci;
-        locked.nativeElement.querySelector('.piece').setAttribute(PIECE_COLOR_ATTRIB, c);
+        locked.nativeElement.querySelector('.piece').setAttribute(ATTRIBUTE_PIECE_COLOR, c);
     }
 }
 
@@ -295,22 +443,7 @@ const interact = (mover: BoardSquare, sig_: Process[], bsqs: BoardSquare[], targ
         }
     });
 
-    // update score signal
-    // calculate correlation of score signal
-
-    let side = mover.piece.isBlack ? 'black' : 'white',
-        scsig = document.querySelector('.'+side+' .score.signal'),
-        sccorr = scsig.querySelector('.correlation-score'),
-        scframe = scsig.querySelector('iframe'),
-        sig = stripSignal(sig_),
-        sig_t = sig.map(x=>''+Math.round(x*100)/100),
-        opts = {
-            labels: sig_t,
-            data: sig
-        }
-
-    sccorr.textContent = ''+(Math.round(calculateCorrelation(sig,targetSignal,true,true,false)*1e20)/1e18);
-    scframe.contentWindow.postMessage(opts, '*');
+    setScoreSignal(mover.piece.isBlack, sig_, targetSignal);
 }
 
 const biasForDirection = (direction: string, isReversed: boolean)=> {
@@ -399,7 +532,7 @@ const signalChange_ = (index: number, value: number, selection: BoardSquare, tar
         psig.querySelector('.info').classList.add('changing');
         if (isBothSelection) opp_psig.querySelector('.info').classList.add('changing');
     }
-    pclrasp.setAttribute(ASPECT_COLOR_ATTRIB, sclr);
+    pclrasp.setAttribute(ATTRIBUTE_ASPECT_COLOR, sclr);
     pclrasp.querySelector('span').textContent = ''+letter+number;
     pcam.querySelector('span').textContent = ''+(Math.round(value*1e18)/1e18);
     psig.querySelector('.correlation-score').textContent = ''+(Math.round(corr*1e20)/1e18);
@@ -462,8 +595,8 @@ const calculateCorrelation = (sig: number[], tsig: number[], diversityIsRelative
 const pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSquare, isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[], prevColorIndex: number, prevSignal: number[], procSig: Process[])=> {
     let pelem = e.target.parentNode,
         bsqelem = pelem.parentNode.parentNode,
-        l = parseInt(bsqelem.getAttribute(LETTER_INDEX_ATTRIB)),
-        pn = parseInt(bsqelem.getAttribute(POSITION_NUMBER_ATTRIB)),
+        l = parseInt(bsqelem.getAttribute(ATTRIBUTE_LETTER_INDEX)),
+        pn = parseInt(bsqelem.getAttribute(ATTRIBUTE_POSITION_NUMBER)),
         bsq = bsqs[coordsToBoardIndex(l,pn)],
         selclass = isBlackTurn ? 'black-selection' : 'white-selection',
         side = isBlackTurn ? 'black' : 'white',
@@ -509,7 +642,7 @@ const pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: Board
                 let pckrs = document.getElementsByClassName(side+' color-picker');
                 Array.prototype.forEach.call(pckrs, pckr=>{
                     pckr.classList.remove('color-picker-active');
-                    pckr.querySelector('button').setAttribute(DISABLED_ATTRIB, 'true');
+                    pckr.querySelector('button').setAttribute(ATTRIBUTE_DISABLED, 'true');
                 });
             } else {
                 let side = isBlackTurn ? 'black' : 'white',
@@ -556,7 +689,7 @@ const pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: Board
                 let pckrs = document.getElementsByClassName(side+' color-picker');
                 Array.prototype.forEach.call(pckrs, pckr=>{
                     pckr.classList.remove('color-picker-active');
-                    pckr.querySelector('button').setAttribute(DISABLED_ATTRIB, 'true');
+                    pckr.querySelector('button').setAttribute(ATTRIBUTE_DISABLED, 'true');
                 });
                 let oselc = document.querySelector('.'+side+'.color-picker button.selected');
                 if (oselc != null) oselc.classList.remove('selected');
@@ -605,7 +738,7 @@ const pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: Board
                 let pckrs = document.getElementsByClassName(side+' color-picker');
                 Array.prototype.forEach.call(pckrs, pckr=> {
                     pckr.classList.add('color-picker-active');
-                    pckr.querySelector('button').removeAttribute(DISABLED_ATTRIB);
+                    pckr.querySelector('button').removeAttribute(ATTRIBUTE_DISABLED);
                 });
                 if (spc.isBlack) {
                     pckrs[spc.colorIndex].querySelector('button').classList.add('selected');
@@ -648,7 +781,7 @@ const pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: Board
 const enableMoves = (bsqs: BoardSquare[])=> {
     bsqs.forEach((bsq)=> {
         let ta = bsq.nativeElement.querySelector('.touch-area');
-        ta.removeAttribute(DISABLED_ATTRIB);
+        ta.removeAttribute(ATTRIBUTE_DISABLED);
         ta.classList.add('possible-move');
     });
 }
@@ -656,7 +789,7 @@ const enableMoves = (bsqs: BoardSquare[])=> {
 const voidMoves = (bsqs: BoardSquare[])=> {
     bsqs.forEach((bsq)=> {
         let ta = bsq.nativeElement.querySelector('.touch-area');
-        ta.setAttribute(DISABLED_ATTRIB, 'true');
+        ta.setAttribute(ATTRIBUTE_DISABLED, 'true');
         ta.classList.remove('possible-move');
     });
 }
@@ -671,21 +804,21 @@ const removeFocus = (bsq: BoardSquare, selclass: string, bsqs: BoardSquare[])=> 
 
 // TODO: Before loading a saved game, use the coordinates of pieces to retrieve
 // BoardSquare DOMElements to construct BoardSquare object array for this function.
-const setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[], isNewGame: boolean)=> {
+const setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[], fromBoardSquares: BoardSquare[])=> {
 
-    if (isNewGame) {
+    if (fromBoardSquares == null) {
         for (let i = 0; i < 6; i++) {
             boardSquares[i].piece = new Piece(false, i%6, null, null);
             boardSquares[i+12].piece = new Piece(false, 5-i%6, null, null);
             boardSquares[i+18].piece = new Piece(true, i%6, null, null);
             boardSquares[i+30].piece = new Piece(true, 5-i%6, null, null);
         }
+    }
 
-        if (isBlackTurn) {
-            document.querySelector('.turns-taken .black').classList.add('current-turn');
-        } else {
-            document.querySelector('.turns-taken .white').classList.add('current-turn');
-        }
+    if (isBlackTurn) {
+        document.querySelector('.turns-taken .black').classList.add('current-turn');
+    } else {
+        document.querySelector('.turns-taken .white').classList.add('current-turn');
     }
 
     Array.prototype.forEach.call(document.getElementsByClassName('target signal'), (tsig)=> {
@@ -702,17 +835,25 @@ const setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackT
 
     for (let i = 0; i < boardSquares.length; i++) {
         let bsq = boardSquares[i],
-            p = bsq.piece,
+            p: Piece = null,
             pelem = bsq.nativeElement.querySelector('.piece'),
             pelemb = bsq.nativeElement.querySelector('.touch-area');
+        if (fromBoardSquares != null) {
+            p = bsq.piece = fromBoardSquares[i].piece;
+        } else {
+            p = bsq.piece;
+        }
+        pelem.classList.remove('disturbed');
+        pelem.classList.remove('black-selection');
+        pelem.classList.remove('white-selection');
         if (p != null) {
-            let side = p.isBlack ? BLACK_PROP : WHITE_PROP,
+            let side = p.isBlack ? PROPERTY_BLACK : PROPERTY_WHITE,
                 color = isSimpleMode ? pieceSimpleColors[p.colorIndex] : side;
-            pelem.setAttribute(PIECE_SIDE_ATTRIB, side);
-            pelem.setAttribute(PIECE_COLOR_ATTRIB, color);
-            pelemb.removeAttribute(DISABLED_ATTRIB);
-            p.positionLetterIndex = parseInt(bsq.nativeElement.getAttribute(LETTER_INDEX_ATTRIB));
-            p.positionNumber = parseInt(bsq.nativeElement.getAttribute(POSITION_NUMBER_ATTRIB));
+            pelem.setAttribute(ATTRIBUTE_PIECE_SIDE, side);
+            pelem.setAttribute(ATTRIBUTE_PIECE_COLOR, color);
+            pelemb.removeAttribute(ATTRIBUTE_DISABLED);
+            p.positionLetterIndex = parseInt(bsq.nativeElement.getAttribute(ATTRIBUTE_LETTER_INDEX));
+            p.positionNumber = parseInt(bsq.nativeElement.getAttribute(ATTRIBUTE_POSITION_NUMBER));
 
             if (p.isBlack === isBlackTurn) {
                 pelem.classList.add('woke');
@@ -720,13 +861,11 @@ const setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackT
                 pelem.classList.remove('woke');
             }
         } else {
-            pelem.removeAttribute(PIECE_SIDE_ATTRIB);
-            pelem.removeAttribute(PIECE_COLOR_ATTRIB);
-            pelemb.setAttribute(DISABLED_ATTRIB, 'true');
+            pelem.removeAttribute(ATTRIBUTE_PIECE_SIDE);
+            pelem.removeAttribute(ATTRIBUTE_PIECE_COLOR);
+            pelemb.setAttribute(ATTRIBUTE_DISABLED, 'true');
         }
     };
-
-    return boardSquares;
 }
 
 const alternatePieceState = (bsqs: BoardSquare[], isBlackTurn: boolean)=> {
@@ -747,17 +886,17 @@ const updateSquarePair = (nbsq: BoardSquare, obsq: BoardSquare, isSimpleMode: bo
         opc = obsq.nativeElement.querySelector('.piece'),
         opcb = obsq.nativeElement.querySelector('.touch-area');
 
-    let side = p.isBlack ? BLACK_PROP : WHITE_PROP,
+    let side = p.isBlack ? PROPERTY_BLACK : PROPERTY_WHITE,
         color = isSimpleMode ? pieceSimpleColors[p.colorIndex] : side;
-    npc.setAttribute(PIECE_SIDE_ATTRIB, side);
-    npc.setAttribute(PIECE_COLOR_ATTRIB, color);
-    npcb.removeAttribute(DISABLED_ATTRIB);
-    p.positionLetterIndex = parseInt(nbsq.nativeElement.getAttribute(LETTER_INDEX_ATTRIB));
-    p.positionNumber = parseInt(nbsq.nativeElement.getAttribute(POSITION_NUMBER_ATTRIB));
+    npc.setAttribute(ATTRIBUTE_PIECE_SIDE, side);
+    npc.setAttribute(ATTRIBUTE_PIECE_COLOR, color);
+    npcb.removeAttribute(ATTRIBUTE_DISABLED);
+    p.positionLetterIndex = parseInt(nbsq.nativeElement.getAttribute(ATTRIBUTE_LETTER_INDEX));
+    p.positionNumber = parseInt(nbsq.nativeElement.getAttribute(ATTRIBUTE_POSITION_NUMBER));
 
-    opc.removeAttribute(PIECE_SIDE_ATTRIB);
-    opc.removeAttribute(PIECE_COLOR_ATTRIB);
-    opcb.setAttribute(DISABLED_ATTRIB, 'true');
+    opc.removeAttribute(ATTRIBUTE_PIECE_SIDE);
+    opc.removeAttribute(ATTRIBUTE_PIECE_COLOR);
+    opcb.setAttribute(ATTRIBUTE_DISABLED, 'true');
 }
 
 const getPossibleMoves = (positionLetterIndex: number, positionNumber: number, bsqs: BoardSquare[])=> {
@@ -818,6 +957,47 @@ const coordsToBoardIndex = (positionLetterIndex: number, positionNumber: number)
     return 5*(5-positionNumber)+(5-positionNumber)+positionLetterIndex;
 }
 
+const setScoreSignal = (isForBlack: boolean, sig_: Process[], targetSignal: number[])=> {
+    let side = isForBlack ? 'black' : 'white',
+        scsig = document.querySelector('.'+side+' .score.signal'),
+        sccorr = scsig.querySelector('.correlation-score'),
+        scframe = scsig.querySelector('iframe'),
+        sig = stripSignal(sig_),
+        sig_t = sig.map(x=>''+Math.round(x*100)/100),
+        opts = {
+            labels: sig_t,
+            data: sig
+        }
+
+    sccorr.textContent = ''+(Math.round(calculateCorrelation(sig,targetSignal,true,true,false)*1e20)/1e18);
+    scframe.contentWindow.postMessage(opts, '*');
+}
+
+const resetColorPickers = (isForBlack: boolean)=> {
+    let side = isForBlack ? 'black' : 'white',
+        pckrs = document.getElementsByClassName(side+' color-picker')
+    Array.prototype.forEach.call(pckrs, pckr=>{
+        pckr.classList.remove('color-picker-active');
+        pckr.querySelector('button').setAttribute(ATTRIBUTE_DISABLED, 'true');
+    });
+    let oselc = document.querySelector('.'+side+'.color-picker button.selected');
+    if (oselc != null) oselc.classList.remove('selected');
+}
+
+const resetPieceSignals = (isForBlack: boolean)=> {
+    let side = isForBlack ? 'black' : 'white',
+        sigc = document.querySelector('.'+side+'.signals-container'),
+        psig = sigc.querySelector('.piece.signal'),
+        sigframe = psig.querySelector('iframe'),
+        opts = {
+            dragData: false
+        }
+
+    sigframe.contentWindow.postMessage(opts, "*");
+
+    sigc.classList.remove('piece-active');
+}
+
 const perms = (signal: number[])=> {
     let ps = [];
 
@@ -866,6 +1046,16 @@ const arraysEqual = (a, b)=> {
         if (a[i] !== b[i]) return false;
     }
     return true;
+}
+
+const generateUUID = ()=> {
+    var dt = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (dt + Math.random()*16)%16 | 0;
+        dt = Math.floor(dt/16);
+        return (c=='x' ? r :(r&0x3|0x8)).toString(16);
+    });
+    return uuid;
 }
 
 class Piece {
@@ -943,12 +1133,52 @@ class Process {
     }
 }
 
-const LETTER_INDEX_ATTRIB = 'letterIndex',
-    POSITION_NUMBER_ATTRIB = 'number',
-    PIECE_SIDE_ATTRIB = 'pieceSide',
-    PIECE_COLOR_ATTRIB = 'pieceColor',
-    ASPECT_COLOR_ATTRIB = 'aspectColor',
-    DISABLED_ATTRIB = 'disabled';
-    // ADJUSTABLE_ATTRIB = 'adjustable';
-const BLACK_PROP = 'black',
-    WHITE_PROP = 'white';
+class Settings {
+    isSimpleMode: boolean = true;
+    blackVision: string = VISION_BALANCED;
+    whiteVision: string = VISION_BALANCED;
+
+    constructor() {
+
+    }
+}
+
+class GameState {
+    boardSquares: BoardSquare[];
+    isSimpleMode: boolean;
+    isBlackTurn: boolean;
+    blackSelection: number;
+    whiteSelection: number;
+    blackLocked: number;
+    whiteLocked: number;
+    blackSignal: Process[];
+    whiteSignal: Process[];
+    blackTurnsTaken: number;
+    whiteTurnsTaken: number;
+    targetSignal: number[];
+    prevColorIndex: number;
+    prevSignal: number[];
+    lastSaveDate: number;
+    name: string;
+
+    constructor() {
+
+    }
+}
+
+const
+    ATTRIBUTE_LETTER_INDEX = 'letterIndex',
+    ATTRIBUTE_POSITION_NUMBER = 'number',
+    ATTRIBUTE_PIECE_SIDE = 'pieceSide',
+    ATTRIBUTE_PIECE_COLOR = 'pieceColor',
+    ATTRIBUTE_ASPECT_COLOR = 'aspectColor',
+    ATTRIBUTE_DISABLED = 'disabled';
+    // ATTRIBUTE_ADJUSTABLE = 'adjustable';
+const
+    PROPERTY_BLACK = 'black',
+    PROPERTY_WHITE = 'white';
+
+const
+    VISION_INTUITION = "VISION_INTUITION",
+    VISION_LOGIC = "VISION_LOGIC",
+    VISION_BALANCED = "VISION_BALANCED";

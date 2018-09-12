@@ -15,6 +15,15 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 
+$blackPrimary: rgb(40,40,40);
+$whitePrimary: rgb(255,255,255);
+$sexRed: Red;
+$sexGreen: MediumSpringGreen;
+$sexOrange: Orange;
+$sexBlue: DodgerBlue;
+$sexYellow: Yellow;
+$sexPurple: Fuchsia;
+
 sex-app {
     ion-menu .scroll-content {
         overflow-y: auto;
@@ -30,11 +39,11 @@ sex-app {
         background-color: white !important;
         background-image: linear-gradient(#ffffff, #efefef) !important;
         background-image: linear-gradient(0deg, transparent 24%,
-                            rgba(0, 0, 0, .05) 25%, rgba(0, 0, 0, .05) 26%, transparent 27%, transparent 74%,
-                            rgba(0, 0, 0, .05) 75%, rgba(0, 0, 0, .05) 76%, transparent 77%, transparent),
+                            rgba(0, 0, 0, .03) 25%, rgba(0, 0, 0, .03) 26%, transparent 27%, transparent 74%,
+                            rgba(0, 0, 0, .03) 75%, rgba(0, 0, 0, .03) 76%, transparent 77%, transparent),
                             linear-gradient(90deg, transparent 24%,
-                            rgba(0, 0, 0, .05) 25%, rgba(0, 0, 0, .05) 26%, transparent 27%, transparent 74%,
-                            rgba(0, 0, 0, .05) 75%, rgba(0, 0, 0, .05) 76%, transparent 77%, transparent) !important;
+                            rgba(0, 0, 0, .03) 25%, rgba(0, 0, 0, .03) 26%, transparent 27%, transparent 74%,
+                            rgba(0, 0, 0, .03) 75%, rgba(0, 0, 0, .03) 76%, transparent 77%, transparent) !important;
         background-size: 50px 50px !important;
 
         ion-content, ion-item, button {
@@ -109,8 +118,9 @@ sex-app {
         }
 
         .menu-item-text.button-text {
-            text-decoration: underline;
+            // text-decoration: underline;
             border-bottom: 0.2px solid black;
+            // padding-bottom: 2px;
         }
 
         .heading {
@@ -184,5 +194,63 @@ sex-app {
             font-weight: bold;
             margin-right: 0.5em;
         }
+
+        .playing-with {
+            ion-item:first-child {
+                min-height: 1em !important;
+                // height: 1em !important;
+                margin-top: 1em;
+                // text-decoration: underline;
+                // text-decoration-style: dotted;
+            }
+
+            ion-item:nth-child(3) {
+                min-height: 1.3em !important;
+
+                p {
+                    font-size: 8px;
+                    text-align: right;
+                }
+            }
+
+            ion-item:nth-child(4) {
+                // min-height: 1em !important;
+                clear: both;
+
+                button {
+                    border: 1px dashed $blackPrimary;
+                    margin-left: 10px;
+                    float: right;
+
+                    ion-icon {
+                        margin-right: 5px;
+                    }
+                }
+
+                button:active, button:focus {
+                    border-style: solid;
+                }
+
+                .save-ack {
+                    float: right;
+                    font-size:  10px;
+                }
+            }
+        }
+
+        ion-item.item-input {
+            border-bottom: 1px dotted #dedede !important;
+            margin-left: 1em !important;
+            padding-right: 1em !important;
+        }
+
+        ion-item.item-input-has-focus, ion-item.input-has-focus {
+            box-shadow: none !important;
+            border-color: Black !important;
+        }
     }
+}
+
+.alert-delete {
+    color: Red !important;
 }

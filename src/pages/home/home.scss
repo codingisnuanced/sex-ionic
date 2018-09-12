@@ -16,6 +16,15 @@ page-home {
     ion-content {
         padding: 0!important;
         border: 1px dashed black;
+        background-color: white !important;
+        background-image: linear-gradient(#ffffff, #efefef) !important;
+        background-image: linear-gradient(0deg, transparent 24%,
+                            rgba(0, 0, 0, .03) 25%, rgba(0, 0, 0, .03) 26%, transparent 27%, transparent 74%,
+                            rgba(0, 0, 0, .03) 75%, rgba(0, 0, 0, .03) 76%, transparent 77%, transparent),
+                            linear-gradient(90deg, transparent 24%,
+                            rgba(0, 0, 0, .03) 25%, rgba(0, 0, 0, .03) 26%, transparent 27%, transparent 74%,
+                            rgba(0, 0, 0, .03) 75%, rgba(0, 0, 0, .03) 76%, transparent 77%, transparent) !important;
+        background-size: 50px 50px !important;
 
         .scroll-content {
             overflow: auto;
@@ -118,6 +127,16 @@ page-home {
                     width: calc(100%/3);
                     height: 100%;
                     float: right;
+                    background: none;
+                }
+
+                .control.load {
+                    font-size: 12px;
+                    text-transform: uppercase;
+                    ion-icon {
+                        margin-right: 5px;
+                        vertical-align: middle;
+                    }
                 }
             }
         }
