@@ -254,3 +254,31 @@ sex-app {
 .alert-delete {
     color: Red !important;
 }
+
+ion-toast.sexapp-game {
+    .toast-message, .toast-button {
+        font-size: 12px;
+    }
+}
+
+ion-toast.sexapp-game.white {
+    transform: scale(-1,-1);
+}
+
+ion-toast.sexapp-share {
+    .toast-container {
+        background-color: White;
+        border: 1px solid $blackPrimary;
+    }
+
+    .toast-message, .toast-button {
+        color: $blackPrimary;
+    }
+
+    .toast-message {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+}

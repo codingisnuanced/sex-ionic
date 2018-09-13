@@ -1,4 +1,4 @@
-<ion-content padding no-bounce id="page-home-content" clas>
+<ion-content padding no-bounce id="page-home-content">
     <header>
         <ion-grid>
             <ion-row>
@@ -11,15 +11,15 @@
                                 A Game of Interaction
                             </span>
                             <br>
-                            <span class="site-link"><a href="#">Tosotolabs.info</a></span>
+                            <span class="site-link"><a href="http://tosotolabs.info" target="_blank">Tosotolabs.info</a></span>
                         </h6>
                     </div>
                 </ion-col>
                 <ion-col>
                     <div class="controls-container">
                         <button class="control" ion-button-small icon-only clear menuToggle><ion-icon name="more"></ion-icon></button>
-                        <button class="control" ion-button-small icon-only clear><ion-icon ios="md-share" md="md-share"></ion-icon></button>
-                        <button class="control load" ion-button-small clear (tap)="save($event)"><ion-icon name="ios-bookmark"></ion-icon>Save</button>
+                        <button class="control" ion-button-small icon-only clear (tap)="share($event)"><ion-icon name="md-share"></ion-icon></button>
+                        <button class="control autosave" ion-button-small clear (tap)="save($event)"><ion-icon name="ios-bookmark"></ion-icon>Auto</button>
                     </div>
                     <div class="turns-taken">
                         <div class="valign-fix">

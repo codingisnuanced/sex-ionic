@@ -130,13 +130,18 @@ page-home {
                     background: none;
                 }
 
-                .control.load {
+                .control.autosave {
                     font-size: 12px;
                     text-transform: uppercase;
                     ion-icon {
                         margin-right: 5px;
                         vertical-align: middle;
                     }
+                    visibility: hidden;
+                }
+
+                .control.autosave.working {
+                    visibility: initial;
                 }
             }
         }
@@ -145,7 +150,9 @@ page-home {
     .signals-container {
         clear: both;
         height: 70px;
+        width: 350px;
         position: relative;
+        margin: 0 auto;
     }
 
     .signal {

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Events, MenuController, Platform } from 'ionic-angular';
+import { Events, MenuController, Platform, ToastController } from 'ionic-angular';
 import { Storage } from "@ionic/storage";
 
 @Component({
@@ -20,15 +20,16 @@ export class SexGame {
     targetSignal: number[];
     prevColorIndex: number;
     prevSignal: number[];
+    lastSaveDate: number;
     name: string = '';
     id: string;
 
-    constructor(public platform: Platform, public menu: MenuController, public events: Events, private storage: Storage) {
+    constructor(public platform: Platform, public menu: MenuController, private toastCtrl: ToastController, public events: Events, private storage: Storage) {
         menu.enable(true);
 
         events.subscribe('game:save', (name: string)=> {
             this.name = name;
-            this.save(null);
+            this.save(null, true);
         });
 
         events.subscribe('game:load', (gs: GameState, id: string)=> {
@@ -43,6 +44,10 @@ export class SexGame {
 
         events.subscribe('game:nameChange', (name:string)=> {
             this.name = name;
+        });
+
+        events.subscribe('game:share', ()=> {
+            this.share(null);
         });
     }
 
@@ -111,7 +116,8 @@ export class SexGame {
         this.blackSelection = this.whiteSelection = null;
         this.blackLocked = this.whiteLocked = null;
         this.prevSignal = this.prevColorIndex = null;
-        this.name = null;
+        this.lastSaveDate = null;
+        this.name = '';
         this.id = generateUUID();
 
         let t = document.querySelector('.turns-taken');
@@ -130,6 +136,9 @@ export class SexGame {
             this.blackSignal.push(new Process(0.5));
         }
 
+        setScoreSignal(true, this.blackSignal, this.targetSignal);
+        setScoreSignal(false, this.whiteSignal, this.targetSignal);
+
         resetColorPickers(true);
         resetColorPickers(false);
 
@@ -145,24 +154,35 @@ export class SexGame {
         this.isBlackTurn = gs.isBlackTurn;
         this.blackSelection = this.whiteSelection = null;
         this.targetSignal = gs.targetSignal;
-        this.blackSignal = gs.blackSignal;
-        this.whiteSignal = gs.whiteSignal;
+        this.blackSignal = gs.blackSignal.map(gproc => {
+            let proc = new Process(gproc.value);
+            proc.times = gproc.times;
+            proc.total = gproc.total;
+            return proc;
+        });
+        this.whiteSignal = gs.whiteSignal.map(gproc => {
+            let proc = new Process(gproc.value);
+            proc.times = gproc.times;
+            proc.total = gproc.total;
+            return proc;
+        });
         this.prevColorIndex = gs.prevColorIndex;
         this.prevSignal = gs.prevSignal;
         this.name = gs.name;
         this.id = id;
 
         this.boardSquares = gatherBoardSquares();
+        setupBoard(this.boardSquares, this.isSimpleMode, this.isBlackTurn, this.targetSignal, gs.boardSquares);
 
         let bsq: BoardSquare = null;
         if (gs.blackLocked > -1) {
             bsq = this.boardSquares[gs.blackLocked];
-            bsq.nativeElement.classList.add('disturbed');
+            bsq.nativeElement.querySelector('.piece').classList.add('disturbed');
             this.blackLocked = bsq;
         }
         if (gs.whiteLocked > -1) {
             bsq = this.boardSquares[gs.whiteLocked];
-            bsq.nativeElement.classList.add('disturbed');
+            bsq.nativeElement.querySelector('.piece').classList.add('disturbed');
             this.whiteLocked = bsq;
         }
 
@@ -180,15 +200,24 @@ export class SexGame {
         resetPieceSignals(true);
         resetPieceSignals(false);
 
-        setupBoard(this.boardSquares, this.isSimpleMode, this.isBlackTurn, this.targetSignal, gs.boardSquares);
+        let type = this.isSimpleMode ? 'Simple' : 'Complex';
+        let name = this.name === '' ? 'on '+formatDate(new Date(gs.lastSaveDate)) : 'with '+this.name;
+        let toast = this.toastCtrl.create({
+            message: 'Loaded '+type+' Sex '+name,
+            duration: 3000,
+            position: 'bottom',
+            cssClass: 'sexapp-game'
+        });
+        toast.present();
 
-        this.save(null);
+        this.save(null, false);
+
         this.events.publish('game:loaded', this.isSimpleMode, this.name);
-
-        // TODO: show toast; game was loaded
     }
 
-    save(e) {
+    save(e, shouldInform: boolean) {
+        document.querySelector('header .control.autosave').classList.add('working');
+
         let gs = new GameState();
         gs.isSimpleMode = this.isSimpleMode;
         gs.isBlackTurn = this.isBlackTurn;
@@ -199,23 +228,11 @@ export class SexGame {
         gs.prevSignal = this.prevSignal;
         gs.name = this.name;
         let spc: Piece = null;
-        if (this.blackSelection == null) {
-            gs.blackSelection = -1;
-        } else {
-            spc = this.blackSelection.piece;
-            gs.blackSelection = coordsToBoardIndex(spc.positionLetterIndex, spc.positionNumber);
-        }
         if (this.blackLocked == null) {
             gs.blackLocked = -1;
         } else {
             spc = this.blackLocked.piece;
             gs.blackLocked = coordsToBoardIndex(spc.positionLetterIndex, spc.positionNumber);
-        }
-        if (this.whiteSelection == null) {
-            gs.whiteSelection = -1;
-        } else {
-            spc = this.whiteSelection.piece;
-            gs.whiteSelection = coordsToBoardIndex(spc.positionLetterIndex, spc.positionNumber);
         }
         if (this.whiteLocked == null) {
             gs.whiteLocked = -1;
@@ -232,24 +249,45 @@ export class SexGame {
         gs.blackTurnsTaken = parseInt(t.querySelector('.black span').textContent);
         gs.whiteTurnsTaken = parseInt(t.querySelector('.white span').textContent);
 
-        gs.lastSaveDate = Date.now();
+        this.lastSaveDate = gs.lastSaveDate = Date.now();
 
-        this.storage.set(this.id, gs);
+        this.storage.set(this.id, gs).then(()=> {
+            this.events.publish('game:saved', true);
 
-        this.events.publish('game:saved', true);
+            if (shouldInform) {
+                let toast = this.toastCtrl.create({
+                    message: 'Saved Sex!',
+                    duration: 1000,
+                    position: 'bottom',
+                    cssClass: 'sexapp-game'
+                });
+                toast.present();
+            }
 
-        // TODO: show toast; game was saved
+            document.querySelector('header .control.autosave').classList.remove('working');
+        });
+    }
+
+    share(e) {
+        let toast = this.toastCtrl.create({
+            message: 'tosotolabs.info/sex',
+            position: 'middle',
+            showCloseButton: true,
+            closeButtonText: 'Ok',
+            cssClass: 'sexapp-share'
+        });
+        toast.present();
     }
 
     pieceTap(e) {
         let res = null;
         if(this.isBlackTurn) {
-            res = pieceTap_(e, this.boardSquares, this.blackSelection, this.blackLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal, this.prevColorIndex, this.prevSignal, this.blackSignal);
+            res = pieceTap_(e, this.boardSquares, this.blackSelection, this.blackLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal, this.prevColorIndex, this.prevSignal, this.blackSignal, this.toastCtrl);
             this.blackSelection = res.selection;
             this.blackLocked = res.locked;
             this.isBlackTurn = res.isBlackTurn;
         } else {
-            res = pieceTap_(e, this.boardSquares, this.whiteSelection, this.whiteLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal, this.prevColorIndex, this.prevSignal, this.whiteSignal);
+            res = pieceTap_(e, this.boardSquares, this.whiteSelection, this.whiteLocked, this.isSimpleMode, this.isBlackTurn, this.targetSignal, this.prevColorIndex, this.prevSignal, this.whiteSignal, this.toastCtrl);
             this.whiteSelection = res.selection;
             this.whiteLocked = res.locked;
             this.isBlackTurn = res.isBlackTurn;
@@ -321,6 +359,8 @@ export class SexGame {
 
                 enableMoves(getPossibleMoves(spc.positionLetterIndex,spc.positionNumber,this.boardSquares));
             }
+
+            if (this.lastSaveDate != null) this.save(null,false);
         }
     }
 
@@ -398,12 +438,33 @@ export class SexGame {
         if (oci === ci) return;
 
         if (getPossibleMoves(sel.piece.positionLetterIndex, sel.piece.positionNumber, this.boardSquares).length === 0) {
-            // TODO: show toast; piece is blocked at all directions
+            let pos = positionLetters[sel.piece.positionLetterIndex]+sel.piece.positionNumber,
+                toast = this.toastCtrl.create({
+                    message: pos+' is blocked at all directions!',
+                    duration: 7000,
+                    position: 'bottom',
+                    showCloseButton: true,
+                    closeButtonText: 'Ok',
+                    cssClass: sel.piece.isBlack ? 'sexapp-game' : 'sexapp-game white'
+                });
+
+                toast.present();
             return;
         }
 
         if (ci === this.prevColorIndex) {
-            // TODO: show toast saying color must change because piece was disturbed
+            let pos = positionLetters[sel.piece.positionLetterIndex]+sel.piece.positionNumber,
+                toast = this.toastCtrl.create({
+                    message: pos+' is disturbed. That was its previous color.',
+                    duration: 7000,
+                    position: 'bottom',
+                    showCloseButton: true,
+                    closeButtonText: 'Ok',
+                    cssClass: sel.piece.isBlack ? 'sexapp-game' : 'sexapp-game white'
+                });
+
+                toast.present();
+            return;
         }
 
         if (this.isBlackTurn) {
@@ -426,82 +487,40 @@ export class SexGame {
     }
 }
 
-const interact = (mover: BoardSquare, sig_: Process[], bsqs: BoardSquare[], targetSignal: number[], isSimpleMode: boolean)=> {
+const interact = (mover: BoardSquare, sig_: Process[], bsqs: BoardSquare[], targetSignal: number[], isSimpleMode: boolean, toastCtrl: ToastController)=> {
     if (mover.piece == null) return;
 
-    let nbrs = getNeighbors(mover.piece.positionLetterIndex, mover.piece.positionNumber, bsqs, mover.piece.isBlack);
-
-    // TODO: show toast; D4 interacts with E4, D5
+    let pos = positionLetters[mover.piece.positionLetterIndex]+mover.piece.positionNumber,
+        nbrs = getNeighbors(mover.piece.positionLetterIndex, mover.piece.positionNumber, bsqs, mover.piece.isBlack),
+        message = pos+' interacts with ',
+        nposs = [];
 
     nbrs.forEach((nbr)=> {
+        let npos = positionLetters[nbr.square.piece.positionLetterIndex]+nbr.square.piece.positionNumber;
         if (isSimpleMode) {
             let bias = mover.piece.colorIndex === nbr.square.piece.colorIndex ? Process.positiveBound(nbr.bias*2) : nbr.bias;
             sig_[nbr.square.piece.colorIndex].update(bias);
+            npos += '|'+nbr.bias;
         } else {
             let avgsig = averageSignals(mover.piece.signal, nbr.square.piece.signal);
             for (let i = 0; i < sig_.length; i++) { sig_[i].update(avgsig[i]); }
         }
+        nposs.push(npos);
+    });
+    message+=intercalate_str(", ",nposs);
+
+    let toast = toastCtrl.create({
+        message: message,
+        duration: 10000,
+        showCloseButton: true,
+        closeButtonText: 'Ok',
+        position: 'bottom',
+        cssClass: mover.piece.isBlack ? 'sexapp-game' : 'sexapp-game white'
     });
 
+    toast.present();
+
     setScoreSignal(mover.piece.isBlack, sig_, targetSignal);
-}
-
-const biasForDirection = (direction: string, isReversed: boolean)=> {
-    switch (direction) {
-        case 'up': return isReversed ? 0.5 : 1;
-        case 'top-right': return isReversed ? 0.375 : 0.875;
-        case 'right': return isReversed ? 0.25 : 0.75;
-        case 'bottom-right': return isReversed ? 0.125 : 0.625;
-        case 'down': return isReversed ? 1 : 0.5;
-        case 'bottom-left': return isReversed ? 0.875 : 0.375;
-        case 'left': return isReversed ? 0.75 : 0.25;
-        case 'top-left': return isReversed ? 0.625 : 0.125;
-        default: return 0;
-    }
-}
-
-const getNeighbors = (positionLetterIndex: number, positionNumber: number, bsqs: BoardSquare[], isForBlack)=> {
-    let psbsqs = [],
-        prevl = positionLetterIndex-1,
-        nextl = positionLetterIndex+1,
-        prevn = positionNumber-1,
-        nextn = positionNumber+1,
-        bsq: BoardSquare = null;
-
-    if (prevl >= 0) {
-        bsq = bsqs[coordsToBoardIndex(prevl,positionNumber)]; // left
-        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('left', !isForBlack)});
-        if (prevn >= 0) {
-            bsq = bsqs[coordsToBoardIndex(prevl,prevn)]; // bottom-left
-            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('bottom-left', !isForBlack)});
-        }
-        if (nextn < 6) {
-            bsq = bsqs[coordsToBoardIndex(prevl,nextn)]; // top-left
-            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('top-left', !isForBlack)});
-        }
-    }
-    if (nextl < 6) {
-        bsq = bsqs[coordsToBoardIndex(nextl,positionNumber)]; // right
-        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('right', !isForBlack)});
-        if (prevn >= 0) {
-            bsq = bsqs[coordsToBoardIndex(nextl,prevn)]; // bottom-right
-            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('bottom-right', !isForBlack)});
-        }
-        if (nextn < 6) {
-            bsq = bsqs[coordsToBoardIndex(nextl,nextn)]; // top-right
-            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('top-right', !isForBlack)});
-        }
-    }
-    if (prevn >= 0) {
-        bsq = bsqs[coordsToBoardIndex(positionLetterIndex,prevn)]; // down
-        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('down', !isForBlack)});
-    }
-    if (nextn < 6) {
-        bsq = bsqs[coordsToBoardIndex(positionLetterIndex,nextn)]; // up
-        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('up', !isForBlack)});
-    }
-
-    return psbsqs;
 }
 
 // applies to only complex mode
@@ -553,46 +572,7 @@ const signalChange_ = (index: number, value: number, selection: BoardSquare, tar
     }
 }
 
-const calculateCorrelation = (sig: number[], tsig: number[], diversityIsRelative: boolean, useDistance: boolean, shouldNormalize: boolean)=> {
-    let g = [], gavgs = [], sum = 0,
-        signal = sig.slice(0,sig.length),
-        targetSignal = tsig.slice(0,tsig.length);
-    if (shouldNormalize) {signal=normalize(signal); targetSignal=normalize(targetSignal);}
-
-    for (let i = 0; i < signal.length; i++) {
-        let g_ = [];
-        for (let j = 0; j < signal.length; j++) {
-            g_.push(0);
-        }
-        g.push(g_);
-        gavgs.push(0);
-    }
-
-    for (let i = 0; i < signal.length; i++) {
-        for (let j = i+1; j < signal.length; j++) {
-            let diff = 0;
-            if (useDistance) {
-                diff = Math.abs((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]))/Math.abs(i-j);
-            } else {
-                diff = Math.abs((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]));
-            }
-            g[i][j] = g[j][i] = diff;
-        }
-        gavgs[i] = g[i].reduce((t,n)=> t+n)/(signal.length-1);
-        sum+=g[i].reduce((t,n)=> t+n);
-    }
-    let progDivDiff = 0;
-    if (diversityIsRelative) {
-        progDivDiff = sum/(signal.length*(signal.length-1)/2);
-    } else {
-        progDivDiff = gavgs.reduce((t,n)=>t+n)/signal.length;
-    }
-    let corr = 1-Math.abs(progDivDiff);
-
-    return Math.max(0,Math.min(1,corr));
-}
-
-const pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSquare, isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[], prevColorIndex: number, prevSignal: number[], procSig: Process[])=> {
+const pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: BoardSquare, isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[], prevColorIndex: number, prevSignal: number[], procSig: Process[], toastCtrl: ToastController)=> {
     let pelem = e.target.parentNode,
         bsqelem = pelem.parentNode.parentNode,
         l = parseInt(bsqelem.getAttribute(ATTRIBUTE_LETTER_INDEX)),
@@ -600,20 +580,35 @@ const pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: Board
         bsq = bsqs[coordsToBoardIndex(l,pn)],
         selclass = isBlackTurn ? 'black-selection' : 'white-selection',
         side = isBlackTurn ? 'black' : 'white',
-        didMove = false;
+        didMove = false,
+        thing = isSimpleMode ? 'color' : 'signal';
 
     if (bsq.piece == null) { // move current locked
         if (locked == null) {
-            // TODO: do toast: need to change the piece first
+            let toast = toastCtrl.create({
+                message: 'Change the piece\'s '+thing+' before you move it.',
+                duration: 7000,
+                showCloseButton: true,
+                closeButtonText: 'Ok',
+                position: 'bottom',
+                cssClass: selection.piece.isBlack ? 'sexapp-game' : 'sexapp-game white'
+            });
+
+            toast.present();
         } else {
             let spc = locked.piece;
             if ((isSimpleMode && spc.colorIndex === prevColorIndex) || (isSimpleMode === false && arraysEqual(spc.signal, prevSignal))) {
-                // TODO: toast it up
-                if (isSimpleMode) {
+                let pos = positionLetters[spc.positionLetterIndex]+spc.positionNumber,
+                    toast = toastCtrl.create({
+                        message: 'Change the '+thing+' of '+pos+' before you move it.',
+                        duration: 7000,
+                        showCloseButton: true,
+                        closeButtonText: 'Ok',
+                        position: 'bottom',
+                        cssClass: locked.piece.isBlack ? 'sexapp-game' : 'sexapp-game white'
+                    });
 
-                } else {
-
-                }
+                toast.present();
 
                 return {
                     selection: selection,
@@ -633,7 +628,7 @@ const pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: Board
 
             updateSquarePair(bsq, locked, isSimpleMode);
 
-            interact(bsq, procSig, bsqs, targetSignal, isSimpleMode);
+            interact(bsq, procSig, bsqs, targetSignal, isSimpleMode, toastCtrl);
 
             if (isSimpleMode) {
                 let oselc = document.querySelector('.'+side+'.color-picker button.selected');
@@ -725,11 +720,22 @@ const pieceTap_ = (e, bsqs: BoardSquare[], selection: BoardSquare, locked: Board
             enableMoves(pmvs);
 
         if (pmvs.length === 0) {
-            // TODO: show toast: that piece is blocked at all directions!
+            let pos = positionLetters[l]+pn,
+                toast = toastCtrl.create({
+                    message: pos+' is blocked at all directions!',
+                    duration: 7000,
+                    showCloseButton: true,
+                    closeButtonText: 'Ok',
+                });
+
             if (isBlackTurn && spc.isBlack) {
-                // toast to the black side
+                toast.setPosition('bottom');
+                toast.setCssClass('sexapp-game');
+                toast.present();
             } else if (isBlackTurn === false && spc.isBlack === false) {
-                // toast to the white side
+                toast.setPosition('top');
+                toast.setCssClass('sexapp-game white');
+                toast.present();
             }
         }
 
@@ -802,8 +808,6 @@ const removeFocus = (bsq: BoardSquare, selclass: string, bsqs: BoardSquare[])=> 
     voidMoves(getPossibleMoves(pc.positionLetterIndex, pc.positionNumber, bsqs));
 }
 
-// TODO: Before loading a saved game, use the coordinates of pieces to retrieve
-// BoardSquare DOMElements to construct BoardSquare object array for this function.
 const setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackTurn: boolean, targetSignal: number[], fromBoardSquares: BoardSquare[])=> {
 
     if (fromBoardSquares == null) {
@@ -838,10 +842,12 @@ const setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackT
             p: Piece = null,
             pelem = bsq.nativeElement.querySelector('.piece'),
             pelemb = bsq.nativeElement.querySelector('.touch-area');
-        if (fromBoardSquares != null) {
-            p = bsq.piece = fromBoardSquares[i].piece;
-        } else {
+        if (fromBoardSquares == null) {
             p = bsq.piece;
+        } else if(fromBoardSquares[i].piece != null) {
+            let fbp = fromBoardSquares[i].piece;
+            p = bsq.piece = new Piece(fbp.isBlack, fbp.colorIndex, fbp.positionLetterIndex, fbp.positionNumber);
+            p.signal = fbp.signal;
         }
         pelem.classList.remove('disturbed');
         pelem.classList.remove('black-selection');
@@ -943,6 +949,64 @@ const getPossibleMoves = (positionLetterIndex: number, positionNumber: number, b
     return psbsqs;
 }
 
+const biasForDirection = (direction: string, isReversed: boolean)=> {
+    switch (direction) {
+        case 'up': return isReversed ? 0.5 : 1;
+        case 'top-right': return isReversed ? 0.375 : 0.875;
+        case 'right': return isReversed ? 0.25 : 0.75;
+        case 'bottom-right': return isReversed ? 0.125 : 0.625;
+        case 'down': return isReversed ? 1 : 0.5;
+        case 'bottom-left': return isReversed ? 0.875 : 0.375;
+        case 'left': return isReversed ? 0.75 : 0.25;
+        case 'top-left': return isReversed ? 0.625 : 0.125;
+        default: return 0;
+    }
+}
+
+const getNeighbors = (positionLetterIndex: number, positionNumber: number, bsqs: BoardSquare[], isForBlack)=> {
+    let psbsqs = [],
+        prevl = positionLetterIndex-1,
+        nextl = positionLetterIndex+1,
+        prevn = positionNumber-1,
+        nextn = positionNumber+1,
+        bsq: BoardSquare = null;
+
+    if (prevl >= 0) {
+        bsq = bsqs[coordsToBoardIndex(prevl,positionNumber)]; // left
+        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('left', !isForBlack)});
+        if (prevn >= 0) {
+            bsq = bsqs[coordsToBoardIndex(prevl,prevn)]; // bottom-left
+            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('bottom-left', !isForBlack)});
+        }
+        if (nextn < 6) {
+            bsq = bsqs[coordsToBoardIndex(prevl,nextn)]; // top-left
+            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('top-left', !isForBlack)});
+        }
+    }
+    if (nextl < 6) {
+        bsq = bsqs[coordsToBoardIndex(nextl,positionNumber)]; // right
+        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('right', !isForBlack)});
+        if (prevn >= 0) {
+            bsq = bsqs[coordsToBoardIndex(nextl,prevn)]; // bottom-right
+            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('bottom-right', !isForBlack)});
+        }
+        if (nextn < 6) {
+            bsq = bsqs[coordsToBoardIndex(nextl,nextn)]; // top-right
+            if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('top-right', !isForBlack)});
+        }
+    }
+    if (prevn >= 0) {
+        bsq = bsqs[coordsToBoardIndex(positionLetterIndex,prevn)]; // down
+        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('down', !isForBlack)});
+    }
+    if (nextn < 6) {
+        bsq = bsqs[coordsToBoardIndex(positionLetterIndex,nextn)]; // up
+        if (bsq.piece != null) psbsqs.push({square: bsq, bias:biasForDirection('up', !isForBlack)});
+    }
+
+    return psbsqs;
+}
+
 const gatherBoardSquares = ()=> {
     let bsqs = [];
     let bsqs_ = document.getElementsByClassName('square playable');
@@ -996,6 +1060,45 @@ const resetPieceSignals = (isForBlack: boolean)=> {
     sigframe.contentWindow.postMessage(opts, "*");
 
     sigc.classList.remove('piece-active');
+}
+
+const calculateCorrelation = (sig: number[], tsig: number[], diversityIsRelative: boolean, useDistance: boolean, shouldNormalize: boolean)=> {
+    let g = [], gavgs = [], sum = 0,
+        signal = sig.slice(0,sig.length),
+        targetSignal = tsig.slice(0,tsig.length);
+    if (shouldNormalize) {signal=normalize(signal); targetSignal=normalize(targetSignal);}
+
+    for (let i = 0; i < signal.length; i++) {
+        let g_ = [];
+        for (let j = 0; j < signal.length; j++) {
+            g_.push(0);
+        }
+        g.push(g_);
+        gavgs.push(0);
+    }
+
+    for (let i = 0; i < signal.length; i++) {
+        for (let j = i+1; j < signal.length; j++) {
+            let diff = 0;
+            if (useDistance) {
+                diff = Math.abs((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]))/Math.abs(i-j);
+            } else {
+                diff = Math.abs((signal[i]-signal[j])-(targetSignal[i]-targetSignal[j]));
+            }
+            g[i][j] = g[j][i] = diff;
+        }
+        gavgs[i] = g[i].reduce((t,n)=> t+n)/(signal.length-1);
+        sum+=g[i].reduce((t,n)=> t+n);
+    }
+    let progDivDiff = 0;
+    if (diversityIsRelative) {
+        progDivDiff = sum/(signal.length*(signal.length-1)/2);
+    } else {
+        progDivDiff = gavgs.reduce((t,n)=>t+n)/signal.length;
+    }
+    let corr = 1-Math.abs(progDivDiff);
+
+    return Math.max(0,Math.min(1,corr));
 }
 
 const perms = (signal: number[])=> {
@@ -1056,6 +1159,20 @@ const generateUUID = ()=> {
         return (c=='x' ? r :(r&0x3|0x8)).toString(16);
     });
     return uuid;
+}
+
+const intercalate_str = (str: string, strs: string[])=> {
+    let res = '';
+    for (let i = 0; i < strs.length; i++) {
+        res+=strs[i];
+        if (i < strs.length-1) res+=str;
+    }
+    return res;
+}
+
+const formatDate = (date: Date)=> {
+    const opts = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'};
+    return date.toLocaleDateString(undefined, opts);
 }
 
 class Piece {
@@ -1133,15 +1250,15 @@ class Process {
     }
 }
 
-class Settings {
-    isSimpleMode: boolean = true;
-    blackVision: string = VISION_BALANCED;
-    whiteVision: string = VISION_BALANCED;
-
-    constructor() {
-
-    }
-}
+// class Settings {
+//     isSimpleMode: boolean = true;
+//     blackVision: string = VISION_BALANCED;
+//     whiteVision: string = VISION_BALANCED;
+//
+//     constructor() {
+//
+//     }
+// }
 
 class GameState {
     boardSquares: BoardSquare[];
@@ -1178,7 +1295,7 @@ const
     PROPERTY_BLACK = 'black',
     PROPERTY_WHITE = 'white';
 
-const
-    VISION_INTUITION = "VISION_INTUITION",
-    VISION_LOGIC = "VISION_LOGIC",
-    VISION_BALANCED = "VISION_BALANCED";
+// const
+//     VISION_INTUITION = "VISION_INTUITION",
+//     VISION_LOGIC = "VISION_LOGIC",
+//     VISION_BALANCED = "VISION_BALANCED";

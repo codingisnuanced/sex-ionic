@@ -8,8 +8,8 @@
                         <span class="title"><img src="assets/imgs/tosoto-logo.png" alt="Tosoto Labs">Sex</span>
                         <br>
                         <span class="description">
-                            Playing <span class="mode">Complex</span><br>
-                            <span class="with">With Dorothy</span>
+                            Playing <span class="mode">Simple</span><br>
+                            <span class="with"></span>
                         </span>
                     </h6>
                 </div>
@@ -43,8 +43,7 @@
                 </div>
             </ion-item> -->
             <ion-item class="item-with-rules">
-                <button ion-button-small icon-only clear (tap)="loadSexTap($event)"><ion-icon ios="ios-game-controller-a" md="ios-game-controller-a"></ion-icon><span class="menu-item-text heading button-text">Load Sex</span></button>
-                <!-- <button ion-button-small icon-only><ion-icon ios="ios-book" md="ios-book"></ion-icon></button> -->
+                <button ion-button-small icon-only clear (tap)="loadSexTap($event)"><ion-icon name="ios-bookmark"></ion-icon><span class="menu-item-text heading button-text">Load Sex</span></button>
             </ion-item>
             <div class="playing-with">
                 <ion-item class="title">
@@ -57,9 +56,12 @@
                     <p>(max 15)</p>
                 </ion-item>
                 <ion-item>
-                    <button ion-button clear color="dark" (tap)="saveSexTap($event)"><ion-icon name="ios-bookmark"></ion-icon>Save</button><span class="save-ack">Saved!</span>
+                    <button ion-button clear color="dark" (tap)="saveSexTap($event)"><ion-icon name="ios-bookmark"></ion-icon>Save</button>
                 </ion-item>
             </div>
+            <ion-item class="item-with-rules">
+                <button ion-button-small icon-only clear (tap)="shareSexTap($event)"><ion-icon name="md-share"></ion-icon><span class="menu-item-text heading button-text">Share Sex</span></button>
+            </ion-item>
         </ion-list>
     </ion-content>
 

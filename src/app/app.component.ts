@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { AlertController, Events, Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -62,8 +62,12 @@ export class SexApp {
         this.events.subscribe('game:loaded', (isSimpleMode, name)=> {
             let desc = document.querySelector('.branding .description');
             desc.querySelector('.mode').textContent = isSimpleMode ? 'Simple' : 'Complex';
-            desc.querySelector('.with').textContent = name;
             this.playingWithInput = name;
+            if (this.playingWithInput === '') {
+                desc.querySelector('.with').textContent = '';
+            } else {
+                desc.querySelector('.with').textContent = 'With '+this.playingWithInput;
+            }
         });
 
         this.events.publish('game:saved', false);
@@ -132,6 +136,10 @@ export class SexApp {
       });
 
       alert.present();
+    }
+
+    shareSexTap(e) {
+        this.events.publish('game:share');
     }
 
     startSimpleSex(e) {
