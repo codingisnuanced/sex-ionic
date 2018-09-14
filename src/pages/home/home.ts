@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Events, MenuController, Platform, ToastController } from 'ionic-angular';
+import { AlertController, Events, MenuController, Platform, ToastController } from 'ionic-angular';
 import { Storage } from "@ionic/storage";
 
 @Component({
@@ -24,7 +24,7 @@ export class SexGame {
     name: string = '';
     id: string;
 
-    constructor(public platform: Platform, public menu: MenuController, private toastCtrl: ToastController, public events: Events, private storage: Storage) {
+    constructor(public platform: Platform, public alertCtrl: AlertController, public menu: MenuController, private toastCtrl: ToastController, public events: Events, private storage: Storage) {
         menu.enable(true);
 
         events.subscribe('game:save', (name: string)=> {
@@ -52,6 +52,14 @@ export class SexGame {
     }
 
     ngAfterViewInit() {
+        if (this.platform.is('mobileweb') && window.matchMedia('(display-mode: standalone)').matches  == false) {
+            let alert = this.alertCtrl.create({
+                title: 'Save Sex!',
+                message: 'Get the best Sex experience by saving this page to your home screen. (If you want to play fullscreen.)',
+                buttons: ['Ok']
+            });
+            alert.present();
+        }
 
         this.reset(this.isSimpleMode);
 
