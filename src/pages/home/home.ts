@@ -338,14 +338,14 @@ export class SexGame {
                 let side = this.isBlackTurn ? 'black' : 'white',
                     spc = sel.piece;
 
-                if (this.isSimpleMode) {
+                if (this.isSimpleMode && spc.isBlack === this.isBlackTurn) {
                     let pckrs = document.getElementsByClassName(side+' color-picker');
                     Array.prototype.forEach.call(pckrs, pckr=> {
                         pckr.classList.add('color-picker-active');
                         pckr.querySelector('button').removeAttribute(ATTRIBUTE_DISABLED);
                     });
                     pckrs[spc.colorIndex].querySelector('button').classList.add('selected');
-                } else {
+                } else if (this.isSimpleMode === false) {
                     let sigc = document.querySelector('.'+side+'.signals-container'),
                         psig = sigc.querySelector('.piece.signal'),
                         sigframe = psig.querySelector('iframe'),
@@ -361,11 +361,13 @@ export class SexGame {
 
                     sigc.classList.add('piece-active');
 
-                    psig.querySelector('.name').textContent = ''+positionLetters[spc.positionLetterIndex]+spc.positionNumber;
+                    let nmprfx = '';
+                    if (spc.isBlack !== this.isBlackTurn) nmprfx= '(Opponent) ';
+                    psig.querySelector('.name').textContent = nmprfx+positionLetters[spc.positionLetterIndex]+spc.positionNumber;
                     psig.querySelector('.correlation-score').textContent = ''+(Math.round(calculateCorrelation(sig,this.targetSignal,true,true,false)*1e20)/1e18);
                 }
 
-                enableMoves(getPossibleMoves(spc.positionLetterIndex,spc.positionNumber,this.boardSquares));
+                if (spc.isBlack === this.isBlackTurn) enableMoves(getPossibleMoves(spc.positionLetterIndex,spc.positionNumber,this.boardSquares));
             }
 
             if (this.lastSaveDate != null) this.save(null,false);
@@ -860,6 +862,7 @@ const setupBoard = (boardSquares: BoardSquare[], isSimpleMode: boolean, isBlackT
         pelem.classList.remove('disturbed');
         pelem.classList.remove('black-selection');
         pelem.classList.remove('white-selection');
+        pelemb.classList.remove('possible-move');
         if (p != null) {
             let side = p.isBlack ? PROPERTY_BLACK : PROPERTY_WHITE,
                 color = isSimpleMode ? pieceSimpleColors[p.colorIndex] : side;
